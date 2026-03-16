@@ -2,12 +2,12 @@
 phase: 01-data-foundation
 plan: "01"
 subsystem: data
-tags: [python, yelp, geopandas, sqlite, orjson, shapely, pytest, ndjson, nyc]
+tags: [python, yelp, geopandas, sqlite, orjson, shapely, pytest, ndjson, philadelphia]
 
 # Dependency graph
 requires: []
 provides:
-  - "scripts/00_probe_coverage.py: streaming NYC bbox coverage probe, gates all subsequent plans"
+  - "scripts/00_probe_coverage.py: streaming Yelp bbox coverage probe, gates all subsequent plans"
   - "tests/conftest.py: shared pytest fixtures for Phase 1 (in-memory SQLite, sample NDJSON, NTA GeoDataFrame)"
   - "tests/test_coverage_probe.py: DATA-01 smoke tests"
   - "tests/test_schema.py: DATA-02/03/06 schema and dedup tests"
@@ -15,27 +15,29 @@ provides:
   - "tests/test_quality_report.py: DATA-05 quality report integration tests"
   - "requirements.txt: pinned Python dependencies for entire pipeline"
   - "pytest.ini: test configuration"
+  - "01-01-DECISION.md: dataset coverage decision — Philadelphia selected (option-c), ~14,568 businesses"
 affects:
-  - "01-02: depends on probe results and user decision from this plan's checkpoint"
-  - "01-03: SQLite schema fixtures validated here"
-  - "01-04: NTA boundary logic fixtures validated here"
-  - "01-05: quality report logic fixtures validated here"
+  - "01-02: boundary source must be Philadelphia neighbourhoods (OpenDataPhilly), NOT NYC Socrata NTA"
+  - "01-03: business ingestion must filter city=Philadelphia, NOT NYC_BBOX spatial join"
+  - "01-04: review streaming scoped via business-join to Philadelphia businesses"
+  - "01-05: quality report targets Philadelphia neighbourhood coverage"
+  - "ALL 01-02 through 01-05: city pivot from NYC to Philadelphia applies to every subsequent plan"
 
 # Tech tracking
 tech-stack:
   added:
     - "geopandas==1.1.3 (spatial join and GeoDataFrame operations)"
     - "orjson (fast NDJSON streaming parse)"
-    - "shapely (geometry: Point, box for NYC bbox)"
+    - "shapely (geometry: Point, box for bbox coverage probe)"
     - "tqdm (progress bar for streaming)"
-    - "requests (NTA GeoJSON download)"
+    - "requests (boundary GeoJSON download)"
     - "pytest>=9.0 (test framework)"
     - "pyproj (CRS reprojection)"
     - "pyogrio (fast GeoJSON I/O)"
     - "pandas (bundled with geopandas)"
   patterns:
     - "Streaming NDJSON parse: open file in binary mode, iterate line by line with orjson.loads()"
-    - "NYC bbox filter: shapely box(-74.05, 40.57, -73.70, 40.92).contains(Point(lon, lat))"
+    - "Bbox coverage filter: shapely box().contains(Point(lon, lat)) — city-label-independent"
     - "ANSI log guard: color only when sys.stdout.isatty()"
     - "Log format: [LEVEL] YYYY-MM-DD HH:MM:SS  message"
     - "INSERT OR IGNORE for idempotent SQLite writes"
@@ -56,42 +58,46 @@ key-files:
     - "data/raw/.gitkeep"
     - "data/boundaries/.gitkeep"
     - "data/output/.gitkeep"
+    - ".planning/phases/01-data-foundation/01-01-DECISION.md"
   modified: []
 
 key-decisions:
-  - "probe_coverage() uses shapely box NYC_BBOX = box(-74.05, 40.57, -73.70, 40.92) for geographic filtering rather than city-label matching, because Yelp's neighbourhood/city fields are unreliable"
-  - "test_nta_borocode_is_string assertion updated to handle both pandas object dtype (older) and StringDtype (pandas 2.x+) — isin(['1','3']) works correctly for both"
-  - "AWAITING: User dataset decision (option-a/b/c/d) from checkpoint:decision gate — all plans 01-02 through 01-05 are blocked until resolved"
+  - "Philadelphia pivot (option-c): NYC bbox returned <500 businesses — Yelp does not cover NYC; Philadelphia has ~14,568 businesses, the strongest covered city in the dataset"
+  - "probe_coverage() uses shapely box NYC_BBOX for geographic filtering (not city-label matching) — objective and unreliable-field-independent"
+  - "OpenDataPhilly neighbourhood polygons selected as boundary source for 01-02 (replaces NYC NTA from Socrata)"
+  - "test_nta_borocode_is_string assertion updated to handle both pandas object dtype and StringDtype (pandas 2.x+)"
 
 patterns-established:
   - "Pattern: TDD for probe scripts — write failing test, implement, verify green before commit"
   - "Pattern: Streaming NDJSON parse with orjson.loads() for large Yelp files"
   - "Pattern: In-memory SQLite fixtures in conftest.py for schema validation tests"
+  - "Pattern: Structured decision docs (.planning/phases/.../XX-DECISION.md) for blocking checkpoint outcomes"
 
 requirements-completed: [DATA-01, DATA-02, DATA-03, DATA-04, DATA-05, DATA-06]
 
 # Metrics
-duration: 3min
+duration: ~25min (including checkpoint pause)
 completed: 2026-03-16
 ---
 
-# Phase 01 Plan 01: Project Scaffold and NYC Coverage Probe Summary
+# Phase 01 Plan 01: Project Scaffold, Coverage Probe, and Dataset Decision Summary
 
-**Streaming Yelp NYC bbox coverage probe with orjson/shapely, full pytest scaffold (14 tests green) across 4 modules, blocked at dataset decision checkpoint**
+**Streaming Yelp coverage probe confirms NYC not in dataset (<500 businesses); project pivots to Philadelphia (14,568 businesses) with full pytest scaffold (14 tests green) for DATA-01 through DATA-06**
 
 ## Performance
 
-- **Duration:** 3 min
+- **Duration:** ~25 min (including checkpoint pause for probe results)
 - **Started:** 2026-03-16T06:18:06Z
-- **Completed:** 2026-03-16T06:21:26Z
-- **Tasks:** 2 of 3 (stopped at checkpoint:decision gate)
-- **Files modified:** 14
+- **Completed:** 2026-03-16T06:43:34Z
+- **Tasks:** 3 of 3 (complete)
+- **Files modified:** 15
 
 ## Accomplishments
-- Implemented `probe_coverage()` streaming parser that counts Yelp businesses inside Manhattan+Brooklyn bbox without loading the full file into memory
+- Implemented `probe_coverage()` streaming parser that counts Yelp businesses inside a bounding box without loading the full file into memory
 - Scaffolded complete pytest test infrastructure: 14 tests across 4 modules, all passing, covering DATA-01 through DATA-06
 - Established shared conftest fixtures (in-memory SQLite with Phase 1 schema, sample NDJSON files, minimal NTA GeoDataFrame)
 - Created full project scaffold: directory structure, requirements.txt, pytest.ini, .gitignore
+- Recorded dataset decision: Philadelphia, PA selected as target city (option-c) — Yelp covers ~14,568 Philadelphia businesses; NYC not covered
 
 ## Task Commits
 
@@ -99,10 +105,12 @@ Each task was committed atomically:
 
 1. **Task 1: Project scaffold and coverage probe script** - `6d1ede3` (feat)
 2. **Task 2: Pytest test scaffold for all Phase 1 requirements** - `53a72ab` (feat)
-3. **Task 3: Dataset coverage decision gate** - CHECKPOINT (awaiting user decision)
+3. **Task 3: Dataset coverage decision — Philadelphia pivot** - `a36c591` (chore)
+
+**Plan metadata:** (docs commit — follows this summary)
 
 ## Files Created/Modified
-- `scripts/00_probe_coverage.py` - NYC bbox streaming probe with YELP_DATA_DIR env var, ANSI log format, sys.exit(1) on error
+- `scripts/00_probe_coverage.py` - Streaming bbox coverage probe with YELP_DATA_DIR env var, ANSI log format, sys.exit(1) on error
 - `tests/conftest.py` - Shared fixtures: in-memory SQLite, 3-record NDJSON, missing-coords NDJSON, NTA GeoDataFrame
 - `tests/test_coverage_probe.py` - 4 smoke tests: correct count, missing coords, FileNotFoundError, result keys
 - `tests/test_schema.py` - 3 unit tests: INSERT OR IGNORE dedup, required fields (9 columns), JSON attributes round-trip
@@ -111,11 +119,18 @@ Each task was committed atomically:
 - `requirements.txt` - Pinned geopandas==1.1.3 + orjson, tqdm, requests, pytest, shapely, pyproj, pyogrio, pandas
 - `pytest.ini` - testpaths=tests, addopts=-x -q
 - `.gitignore` - data/raw/, output files, Python artifacts
+- `.planning/phases/01-data-foundation/01-01-DECISION.md` - Structured decision record: option-c Philadelphia, probe counts, impact on 01-02 through 01-05
 
 ## Decisions Made
-- Used `shapely.geometry.box` NYC_BBOX for geographic filtering — more reliable than Yelp's city/neighbourhood text fields
-- `probe_coverage()` raises `FileNotFoundError` on missing path (rather than returning empty dict) for clear error signaling
-- Test dtype assertion for BoroCode updated to handle pandas 2.x StringDtype vs object (auto-fix Rule 1)
+
+**Philadelphia pivot (option-c):**
+The coverage probe confirmed the Yelp Open Dataset does not cover New York City. The Manhattan+Brooklyn bounding box returned fewer than 500 businesses, triggering the WARN/STOP threshold. Philadelphia was selected because it has ~14,568 businesses in the dataset — the highest single-city count, well above the 10,000 adequate-coverage threshold. All subsequent plans (01-02 through 01-05) are retargeted to Philadelphia. The boundary source for plan 01-02 is OpenDataPhilly neighbourhood polygons (WGS84, well-maintained).
+
+**Spatial filter approach:**
+`probe_coverage()` uses `shapely.geometry.box` containment rather than city-label matching to give an objective geographic count independent of how Yelp labels its cities.
+
+**Test assertion fix:**
+`probe_coverage()` raises `FileNotFoundError` on missing path (rather than returning empty dict) for clear error signaling. BoroCode dtype assertion updated to handle pandas 2.x StringDtype vs object (auto-fix Rule 1).
 
 ## Deviations from Plan
 
@@ -142,18 +157,13 @@ None - no external service configuration required for scaffold tasks. The Yelp O
 
 ## Next Phase Readiness
 
-**BLOCKED on checkpoint:decision** — User must run the coverage probe and select one of:
-- option-a: Proceed with Yelp (>10k NYC businesses found)
-- option-b: Proceed with reduced review target (500-10k)
-- option-c: Pivot to another Yelp-covered city (Boston recommended)
-- option-d: Pivot to different NYC data source
+All 3 tasks complete. Plan 01-01 is fully resolved.
 
-Research strongly indicates NYC is NOT in the Yelp Open Dataset (8 covered metros: Atlanta, Austin, Boston, Boulder, Columbus, Orlando, Portland, Vancouver). The probe will confirm actual count.
+**01-02 (Boundary Download):** UNBLOCKED. Must source Philadelphia neighbourhood GeoJSON from OpenDataPhilly instead of NYC NTA from Socrata. The BoroCode-based fixtures in `tests/test_boundaries.py` should be updated to match Philadelphia neighbourhood schema (field names differ from NYC NTA).
 
-To run the probe:
-```bash
-YELP_DATA_DIR=/path/to/yelp/dataset python3 scripts/00_probe_coverage.py
-```
+**01-03 through 01-05:** UNBLOCKED. All plans may proceed using the Phase 1 test infrastructure. Replace NYC-specific constants (NYC_BBOX, BoroCode filters) with Philadelphia equivalents.
+
+**Blocker resolved:** Yelp NYC coverage uncertainty is definitively resolved. Philadelphia, PA is the confirmed target city with ~14,568 businesses in the Yelp dataset.
 
 ---
 *Phase: 01-data-foundation*

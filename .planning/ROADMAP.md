@@ -1,8 +1,8 @@
-# Roadmap: Neighbourhood Vibe Mapper -- NYC
+# Roadmap: Neighbourhood Vibe Mapper -- Philadelphia
 
 ## Overview
 
-This project delivers an interactive map of NYC neighbourhood vibes derived from 50k+ business reviews via a deep NLP pipeline. The work flows linearly: collect and validate review data, run the full ML pipeline to produce pre-computed artifacts, stand up a thin serving API, build the core interactive map, layer on temporal animation and visual polish, then deploy to a public URL. Each phase produces artifacts consumed by subsequent phases -- data feeds the pipeline, the pipeline feeds the API, the API feeds the frontend.
+This project delivers an interactive map of Philadelphia neighbourhood vibes derived from business reviews via a deep NLP pipeline. **City pivot (2026-03-16):** Yelp Open Dataset does not cover NYC; Philadelphia selected (option-c) with ~14,568 businesses. See 01-01-DECISION.md. The work flows linearly: collect and validate review data, run the full ML pipeline to produce pre-computed artifacts, stand up a thin serving API, build the core interactive map, layer on temporal animation and visual polish, then deploy to a public URL. Each phase produces artifacts consumed by subsequent phases -- data feeds the pipeline, the pipeline feeds the API, the API feeds the frontend.
 
 ## Phases
 
@@ -22,7 +22,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Phase Details
 
 ### Phase 1: Data Foundation
-**Goal**: A validated, queryable corpus of NYC reviews spanning 2019-2025 with correct neighbourhood boundaries ready for NLP processing (review count contingent on Yelp dataset coverage probe)
+**Goal**: A validated, queryable corpus of Philadelphia reviews spanning 2019-2025 with correct neighbourhood boundaries ready for NLP processing — ~14,568 Philadelphia businesses confirmed in Yelp dataset (NYC not covered; pivot recorded in 01-01-DECISION.md)
 **Depends on**: Nothing (first phase)
 **Requirements**: DATA-01, DATA-02, DATA-03, DATA-04, DATA-05, DATA-06
 **Success Criteria** (what must be TRUE):
@@ -34,9 +34,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 5 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Coverage probe + pytest test scaffold + dataset decision gate
-- [ ] 01-02-PLAN.md — NTA boundary download + NTA name curation mapping
-- [ ] 01-03-PLAN.md — SQLite schema + business ingestion with spatial join
+- [x] 01-01-PLAN.md — Coverage probe + pytest test scaffold + dataset decision gate (COMPLETE: Philadelphia pivot, option-c)
+- [ ] 01-02-PLAN.md — Philadelphia neighbourhood boundary download (OpenDataPhilly) + neighbourhood name curation mapping
+- [ ] 01-03-PLAN.md — SQLite schema + business ingestion with city=Philadelphia filter
 - [ ] 01-04-PLAN.md — Review streaming ingest (NDJSON → reviews table)
 - [ ] 01-05-PLAN.md — Quality report generation + Phase 2 readiness human verification
 
@@ -125,7 +125,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Data Foundation | 1/5 | In Progress|  |
+| 1. Data Foundation (Philadelphia) | 1/5 | In Progress | - |
 | 2. NLP Pipeline | 0/? | Not started | - |
 | 3. Backend API | 0/? | Not started | - |
 | 4. Core Map | 0/? | Not started | - |
