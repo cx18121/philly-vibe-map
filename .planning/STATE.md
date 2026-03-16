@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-03-PLAN.md — SQLite schema and Philadelphia spatial join pipeline
-last_updated: "2026-03-16T07:02:49.126Z"
-last_activity: 2026-03-16 -- Plan 01-02 complete, Philadelphia boundaries committed
+stopped_at: Completed 01-04-PLAN.md — Streaming review ingest and ingest_stats.json sidecar
+last_updated: "2026-03-16T15:31:33Z"
+last_activity: 2026-03-16 -- Plan 01-04 complete, review ingest script committed
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 5
-  completed_plans: 3
-  percent: 10
+  completed_plans: 4
+  percent: 20
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 ## Current Position
 
 Phase: 1 of 6 (Data Foundation)
-Plan: 2 of 5 complete in current phase (01-01 done, 01-02 done, 01-03 next)
+Plan: 4 of 5 complete in current phase (01-01 done, 01-02 done, 01-03 done, 01-04 done)
 Status: In progress
-Last activity: 2026-03-16 -- Plan 01-02 complete, Philadelphia boundaries committed
+Last activity: 2026-03-16 -- Plan 01-04 complete, review ingest script committed
 
-Progress: [██░░░░░░░░] 10% (2/5 plans in Phase 1)
+Progress: [████░░░░░░] 20% (4/5 plans in Phase 1)
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Progress: [██░░░░░░░░] 10% (2/5 plans in Phase 1)
 | Phase 01-data-foundation P01 | 3min | 2 tasks | 14 files |
 | Phase 01-data-foundation P02 | 5min | 2 tasks | 5 files |
 | Phase 01-data-foundation P03 | 4min | 2 tasks | 7 files |
+| Phase 01-data-foundation P04 | 10min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -67,6 +68,8 @@ Recent decisions affecting current work:
 - [Phase 01-data-foundation 01-02]: Philadelphia boundaries committed — 159 neighbourhoods from ArcGIS FeatureServer (opendata.arcgis.com URL returned 403; services1.arcgis.com/jOy9iZUXBy03ojXb works without auth); key fields: NEIGHBORHOOD_NUMBER (ID), NEIGHBORHOOD_NAME; test schema updated for Philadelphia
 - [Phase 01-data-foundation]: Philadelphia fields: NEIGHBORHOOD_NUMBER/NEIGHBORHOOD_NAME used as neighbourhood_id/neighbourhood_name (not NTACode/NTAName from original plan); sjoin uses philadelphia_neighborhoods.geojson with PHILLY_BBOX
 - [Phase 01-data-foundation]: Import alias pattern: scripts/build_schema.py and scripts/assign_neighbourhoods.py are importlib wrappers for numeric-prefix files; enables test imports without renaming pipeline scripts
+- [Phase 01-data-foundation 01-04]: ingest_stats.json sidecar chain: 03_assign_neighbourhoods writes missing_lat_lng/outside_nta; 04_ingest_reviews merges duplicate_business_id/bad_timestamp; 05_quality_report reads merged file for Section 4
+- [Phase 01-data-foundation 01-04]: FK filter via pre-loaded known_business_ids set: ~14,568 Philadelphia IDs loaded before streaming; O(1) per-review lookup during hot loop
 
 ### Pending Todos
 
@@ -79,6 +82,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-16T07:02:49.113Z
-Stopped at: Completed 01-03-PLAN.md — SQLite schema and Philadelphia spatial join pipeline
+Last session: 2026-03-16T15:31:33Z
+Stopped at: Completed 01-04-PLAN.md — Streaming review ingest and ingest_stats.json sidecar
 Resume file: None

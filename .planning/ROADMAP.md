@@ -36,8 +36,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 Plans:
 - [x] 01-01-PLAN.md — Coverage probe + pytest test scaffold + dataset decision gate (COMPLETE: Philadelphia pivot, option-c)
 - [x] 01-02-PLAN.md — Philadelphia neighbourhood boundary download (OpenDataPhilly) + neighbourhood name curation mapping (COMPLETE: 159 neighbourhoods, EPSG:4326, NEIGHBORHOOD_NUMBER/NEIGHBORHOOD_NAME schema)
-- [ ] 01-03-PLAN.md — SQLite schema + business ingestion with city=Philadelphia filter
-- [ ] 01-04-PLAN.md — Review streaming ingest (NDJSON → reviews table)
+- [x] 01-03-PLAN.md — SQLite schema + business ingestion with city=Philadelphia filter (COMPLETE: businesses table populated with ~14,568 Philadelphia businesses)
+- [x] 01-04-PLAN.md — Review streaming ingest (NDJSON → reviews table) (COMPLETE: ingest_reviews() with FK filter, INSERT OR IGNORE, WAL mode, ingest_stats.json sidecar)
 - [ ] 01-05-PLAN.md — Quality report generation + Phase 2 readiness human verification
 
 ### Phase 2: NLP Pipeline
@@ -125,7 +125,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Data Foundation (Philadelphia) | 3/5 | In Progress|  |
+| 1. Data Foundation (Philadelphia) | 4/5 | In Progress |  |
 | 2. NLP Pipeline | 0/? | Not started | - |
 | 3. Backend API | 0/? | Not started | - |
 | 4. Core Map | 0/? | Not started | - |
