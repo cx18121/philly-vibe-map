@@ -92,22 +92,32 @@ def sample_business_ndjson_missing_coords(tmp_path):
 
 
 # ---------------------------------------------------------------------------
-# Fixture: sample NTA GeoJSON GeoDataFrame (minimal, in-memory)
+# Fixture: sample Philadelphia neighbourhood GeoDataFrame (minimal, in-memory)
 # ---------------------------------------------------------------------------
 @pytest.fixture
 def sample_nta_gdf():
-    """Return a minimal GeoDataFrame with 3 NTA-like features: BoroCode 1, 2, 3."""
-    import pandas as pd
+    """Return a minimal GeoDataFrame with 3 Philadelphia neighbourhood features.
+
+    Matches the schema produced by scripts/01_download_boundaries.py from
+    OpenDataPhilly ArcGIS FeatureServer (Philadelphia pivot — see 01-01-DECISION.md).
+
+    Key columns:
+      - NEIGHBORHOOD_NUMBER: unique string identifier, e.g. "044"
+      - NEIGHBORHOOD_NAME:   community-recognised display name
+    """
     from shapely.geometry import Polygon
     data = {
-        "NTACode": ["MN01", "BX01", "BK01"],
-        "NTAName": ["West Village", "Mott Haven", "Williamsburg"],
-        "BoroCode": ["1", "2", "3"],
-        "BoroName": ["Manhattan", "Bronx", "Brooklyn"],
+        "NEIGHBORHOOD_NUMBER": ["044", "116", "121"],
+        "NEIGHBORHOOD_NAME": ["Fishtown - Lower Kensington", "Rittenhouse", "Society Hill"],
+        "DISTRICT_NO": ["01", "08", "05"],
+        "PLANNING_PARTNER": ["DVRPC", "DVRPC", "DVRPC"],
         "geometry": [
-            Polygon([(-74.01, 40.73), (-74.00, 40.73), (-74.00, 40.74), (-74.01, 40.74)]),
-            Polygon([(-73.93, 40.80), (-73.92, 40.80), (-73.92, 40.81), (-73.93, 40.81)]),
-            Polygon([(-73.96, 40.71), (-73.95, 40.71), (-73.95, 40.72), (-73.96, 40.72)]),
+            # Fishtown area (NE Philly, near ~39.97N, -75.13W)
+            Polygon([(-75.14, 39.96), (-75.13, 39.96), (-75.13, 39.97), (-75.14, 39.97)]),
+            # Rittenhouse area (Center City, ~39.95N, -75.17W)
+            Polygon([(-75.18, 39.94), (-75.17, 39.94), (-75.17, 39.95), (-75.18, 39.95)]),
+            # Society Hill area (~39.94N, -75.14W)
+            Polygon([(-75.15, 39.93), (-75.14, 39.93), (-75.14, 39.94), (-75.15, 39.94)]),
         ],
     }
     gdf = gpd.GeoDataFrame(data, crs="EPSG:4326")
