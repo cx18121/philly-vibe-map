@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: "Completed 01-01-PLAN.md — Philadelphia pivot recorded, all 3 tasks done"
-last_updated: "2026-03-16T06:43:34Z"
-last_activity: 2026-03-16 -- Plan 01-01 complete, Philadelphia pivot decision recorded
+stopped_at: "Completed 01-02-PLAN.md — Philadelphia boundary download, 159 neighbourhoods, name curation complete"
+last_updated: "2026-03-16T06:53:14Z"
+last_activity: 2026-03-16 -- Plan 01-02 complete, Philadelphia boundaries committed
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 5
-  completed_plans: 1
-  percent: 0
+  completed_plans: 2
+  percent: 10
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 ## Current Position
 
 Phase: 1 of 6 (Data Foundation)
-Plan: 1 of 5 complete in current phase (01-01 done, 01-02 next)
+Plan: 2 of 5 complete in current phase (01-01 done, 01-02 done, 01-03 next)
 Status: In progress
-Last activity: 2026-03-16 -- Plan 01-01 complete, Philadelphia pivot decision recorded
+Last activity: 2026-03-16 -- Plan 01-02 complete, Philadelphia boundaries committed
 
-Progress: [█░░░░░░░░░] 5% (1/5 plans in Phase 1)
+Progress: [██░░░░░░░░] 10% (2/5 plans in Phase 1)
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Progress: [█░░░░░░░░░] 5% (1/5 plans in Phase 1)
 
 *Updated after each plan completion*
 | Phase 01-data-foundation P01 | 3min | 2 tasks | 14 files |
+| Phase 01-data-foundation P02 | 5min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -62,6 +63,7 @@ Recent decisions affecting current work:
 - Roadmap: 6 phases derived from requirement categories (DATA, NLP, API, MAP, VIZ, DEPLOY) with strict linear dependencies
 - [Phase 01-data-foundation]: probe_coverage() uses shapely box NYC_BBOX for geographic filtering not city-label matching; all plans 01-02 through 01-05 blocked on user dataset decision (option-a/b/c/d)
 - [Phase 01-data-foundation 01-01]: DATASET DECISION RESOLVED — option-c Philadelphia selected; Yelp NYC coverage <500 businesses; Philadelphia has ~14,568; boundary source = OpenDataPhilly; ALL plans 01-02 through 01-05 retargeted to Philadelphia, PA
+- [Phase 01-data-foundation 01-02]: Philadelphia boundaries committed — 159 neighbourhoods from ArcGIS FeatureServer (opendata.arcgis.com URL returned 403; services1.arcgis.com/jOy9iZUXBy03ojXb works without auth); key fields: NEIGHBORHOOD_NUMBER (ID), NEIGHBORHOOD_NAME; test schema updated for Philadelphia
 
 ### Pending Todos
 
@@ -74,6 +76,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-16T06:43:34Z
-Stopped at: Completed 01-01-PLAN.md — all 3 tasks done, Philadelphia pivot recorded
+Last session: 2026-03-16T06:53:14Z
+Stopped at: Completed 01-02-PLAN.md — Philadelphia boundaries (159 neighbourhoods), name curation done
 Resume file: None
