@@ -7,12 +7,12 @@
 
 ### Data Collection
 
-- [ ] **DATA-01**: System collects 50k+ reviews spanning 2019–2025 from Google Places API and Yelp Fusion API across 30 neighbourhoods in Manhattan and Brooklyn
-- [ ] **DATA-02**: System deduplicates and entity-resolves businesses appearing on both platforms using name + lat/lng proximity matching
-- [ ] **DATA-03**: Each stored review includes: text, timestamp, business name, business lat/lng, source platform, neighbourhood assignment
-- [ ] **DATA-04**: System fetches official NYC neighbourhood boundary GeoJSON from NYC Open Data (NTA or community-defined boundaries) and reprojects to WGS84
-- [ ] **DATA-05**: System produces a data quality report (review count by neighbourhood and by year) to validate temporal coverage before NLP begins
-- [ ] **DATA-06**: Raw reviews are stored in SQLite with a source-agnostic unified schema (platform-specific fields preserved as JSON)
+- [x] **DATA-01**: System collects 50k+ reviews spanning 2019–2025 from Google Places API and Yelp Fusion API across 30 neighbourhoods in Manhattan and Brooklyn
+- [x] **DATA-02**: System deduplicates and entity-resolves businesses appearing on both platforms using name + lat/lng proximity matching
+- [x] **DATA-03**: Each stored review includes: text, timestamp, business name, business lat/lng, source platform, neighbourhood assignment
+- [x] **DATA-04**: System fetches official NYC neighbourhood boundary GeoJSON from NYC Open Data (NTA or community-defined boundaries) and reprojects to WGS84
+- [x] **DATA-05**: System produces a data quality report (review count by neighbourhood and by year) to validate temporal coverage before NLP begins
+- [x] **DATA-06**: Raw reviews are stored in SQLite with a source-agnostic unified schema (platform-specific fields preserved as JSON)
 
 ### NLP Pipeline
 
@@ -101,12 +101,12 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | Phase 1 | Pending |
-| DATA-02 | Phase 1 | Pending |
-| DATA-03 | Phase 1 | Pending |
-| DATA-04 | Phase 1 | Pending |
-| DATA-05 | Phase 1 | Pending |
-| DATA-06 | Phase 1 | Pending |
+| DATA-01 | Phase 1 | Complete |
+| DATA-02 | Phase 1 | Complete |
+| DATA-03 | Phase 1 | Complete |
+| DATA-04 | Phase 1 | Complete |
+| DATA-05 | Phase 1 | Complete |
+| DATA-06 | Phase 1 | Complete |
 | NLP-01 | Phase 2 | Pending |
 | NLP-02 | Phase 2 | Pending |
 | NLP-03 | Phase 2 | Pending |
