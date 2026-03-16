@@ -1,7 +1,7 @@
 """
 00_probe_coverage.py
 Wave 0 gate: stream yelp_academic_dataset_business.json, count businesses
-whose lat/lng falls inside the Manhattan+Brooklyn bounding box.
+whose lat/lng falls inside the Philadelphia bounding box.
 
 Usage:
     YELP_DATA_DIR=/path/to/yelp python scripts/00_probe_coverage.py
@@ -9,7 +9,7 @@ Usage:
 Decision thresholds:
     > 10,000 businesses  -> proceed normally
     500-10,000           -> proceed with reduced review target
-    < 500                -> STOP -- dataset likely does not cover NYC
+    < 500                -> STOP -- dataset likely does not cover Philadelphia
 """
 from __future__ import annotations
 
@@ -22,8 +22,9 @@ from pathlib import Path
 import orjson
 from shapely.geometry import Point, box
 
-# Manhattan + Brooklyn bounding box (minx, miny, maxx, maxy)
-NYC_BBOX = box(-74.05, 40.57, -73.70, 40.92)
+# Philadelphia bounding box (minx, miny, maxx, maxy) — slightly larger than city boundary
+# Updated from NYC_BBOX following Philadelphia pivot decision (01-01-DECISION.md)
+PHILLY_BBOX = box(-75.28, 39.87, -74.96, 40.14)
 
 # ANSI color codes (applied only when stdout is a TTY)
 _ANSI = {"WARN": "\033[93m", "FAIL": "\033[91m", "INFO": ""}
@@ -38,13 +39,15 @@ def _log(level: str, msg: str) -> None:
 
 
 def probe_coverage(business_path: str) -> dict:
-    """Stream business NDJSON and count records inside NYC bounding box.
+    """Stream business NDJSON and count records inside Philadelphia bounding box.
 
     Args:
         business_path: Path to yelp_academic_dataset_business.json
 
     Returns:
         dict with keys: total_businesses, nyc_bbox_businesses, missing_coords, nyc_pct
+        Note: nyc_bbox_businesses key retained for backward compatibility — counts
+        Philadelphia businesses (Philadelphia pivot — see 01-01-DECISION.md).
 
     Raises:
         FileNotFoundError: if business_path does not exist
@@ -70,7 +73,7 @@ def probe_coverage(business_path: str) -> dict:
                 missing_coords += 1
                 continue
             pt = Point(float(lon), float(lat))
-            if NYC_BBOX.contains(pt):
+            if PHILLY_BBOX.contains(pt):
                 nyc_count += 1
 
     nyc_pct = round(nyc_count / total * 100, 2) if total > 0 else 0.0
@@ -96,7 +99,7 @@ if __name__ == "__main__":
     _log("INFO", "Yelp business file open -- streaming parse started")
     result = probe_coverage(str(business_file))
 
-    _log("INFO", f"NYC businesses identified: {result['nyc_bbox_businesses']} records")
+    _log("INFO", f"Philadelphia businesses identified: {result['nyc_bbox_businesses']} records")
     _log("INFO", f"Total businesses scanned: {result['total_businesses']}")
     _log("INFO", f"Missing lat/lng: {result['missing_coords']}")
 
@@ -104,13 +107,13 @@ if __name__ == "__main__":
 
     if result["nyc_bbox_businesses"] < 500:
         _log("WARN", (
-            f"Only {result['nyc_bbox_businesses']} NYC businesses found. "
-            "Dataset may not cover New York City. "
+            f"Only {result['nyc_bbox_businesses']} Philadelphia businesses found. "
+            "Dataset may not cover Philadelphia. "
             "DO NOT proceed to ingestion -- consult project owner."
         ))
     elif result["nyc_bbox_businesses"] < 10_000:
         _log("WARN", (
-            f"{result['nyc_bbox_businesses']} NYC businesses found -- below 10k. "
+            f"{result['nyc_bbox_businesses']} Philadelphia businesses found -- below 10k. "
             "Proceeding is possible with a reduced review target."
         ))
     else:
