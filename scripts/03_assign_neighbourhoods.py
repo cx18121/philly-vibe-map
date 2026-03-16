@@ -223,3 +223,18 @@ if __name__ == "__main__":
     except Exception as exc:
         _log("FAIL", f"Database write failed: {exc}. Check disk space and file permissions at {args.db}.")
         sys.exit(1)
+
+    # --- Write ingest_stats.json sidecar (first write; 04 will merge into this) ---
+    import json as _json
+    _stats_path = Path("data/output/ingest_stats.json")
+    _stats_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(_stats_path, "w") as _f:
+        _json.dump(
+            {
+                "missing_lat_lng": result["missing_coords"],
+                "outside_nta": result["outside_neighbourhood"],
+            },
+            _f,
+            indent=2,
+        )
+    _log("INFO", f"Wrote ingest_stats.json: missing_lat_lng={result['missing_coords']}, outside_nta={result['outside_neighbourhood']}")
