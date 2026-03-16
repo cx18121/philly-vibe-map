@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planning
-stopped_at: "Completed 01-02-PLAN.md — Philadelphia boundary download, 159 neighbourhoods, name curation complete"
-last_updated: "2026-03-16T06:53:14Z"
+status: executing
+stopped_at: Completed 01-03-PLAN.md — SQLite schema and Philadelphia spatial join pipeline
+last_updated: "2026-03-16T07:02:49.126Z"
 last_activity: 2026-03-16 -- Plan 01-02 complete, Philadelphia boundaries committed
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 5
-  completed_plans: 2
+  completed_plans: 3
   percent: 10
 ---
 
@@ -52,6 +52,7 @@ Progress: [██░░░░░░░░] 10% (2/5 plans in Phase 1)
 *Updated after each plan completion*
 | Phase 01-data-foundation P01 | 3min | 2 tasks | 14 files |
 | Phase 01-data-foundation P02 | 5min | 2 tasks | 5 files |
+| Phase 01-data-foundation P03 | 4min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -64,6 +65,8 @@ Recent decisions affecting current work:
 - [Phase 01-data-foundation]: probe_coverage() uses shapely box NYC_BBOX for geographic filtering not city-label matching; all plans 01-02 through 01-05 blocked on user dataset decision (option-a/b/c/d)
 - [Phase 01-data-foundation 01-01]: DATASET DECISION RESOLVED — option-c Philadelphia selected; Yelp NYC coverage <500 businesses; Philadelphia has ~14,568; boundary source = OpenDataPhilly; ALL plans 01-02 through 01-05 retargeted to Philadelphia, PA
 - [Phase 01-data-foundation 01-02]: Philadelphia boundaries committed — 159 neighbourhoods from ArcGIS FeatureServer (opendata.arcgis.com URL returned 403; services1.arcgis.com/jOy9iZUXBy03ojXb works without auth); key fields: NEIGHBORHOOD_NUMBER (ID), NEIGHBORHOOD_NAME; test schema updated for Philadelphia
+- [Phase 01-data-foundation]: Philadelphia fields: NEIGHBORHOOD_NUMBER/NEIGHBORHOOD_NAME used as neighbourhood_id/neighbourhood_name (not NTACode/NTAName from original plan); sjoin uses philadelphia_neighborhoods.geojson with PHILLY_BBOX
+- [Phase 01-data-foundation]: Import alias pattern: scripts/build_schema.py and scripts/assign_neighbourhoods.py are importlib wrappers for numeric-prefix files; enables test imports without renaming pipeline scripts
 
 ### Pending Todos
 
@@ -76,6 +79,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-16T06:53:14Z
-Stopped at: Completed 01-02-PLAN.md — Philadelphia boundaries (159 neighbourhoods), name curation done
+Last session: 2026-03-16T07:02:49.113Z
+Stopped at: Completed 01-03-PLAN.md — SQLite schema and Philadelphia spatial join pipeline
 Resume file: None

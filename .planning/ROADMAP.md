@@ -125,7 +125,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Data Foundation (Philadelphia) | 2/5 | In Progress|  |
+| 1. Data Foundation (Philadelphia) | 3/5 | In Progress|  |
 | 2. NLP Pipeline | 0/? | Not started | - |
 | 3. Backend API | 0/? | Not started | - |
 | 4. Core Map | 0/? | Not started | - |
