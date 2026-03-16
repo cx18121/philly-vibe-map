@@ -22,20 +22,23 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Phase Details
 
 ### Phase 1: Data Foundation
-**Goal**: A validated, queryable corpus of 50k+ NYC reviews spanning 2019-2025 with correct neighbourhood boundaries ready for NLP processing
+**Goal**: A validated, queryable corpus of NYC reviews spanning 2019-2025 with correct neighbourhood boundaries ready for NLP processing (review count contingent on Yelp dataset coverage probe)
 **Depends on**: Nothing (first phase)
 **Requirements**: DATA-01, DATA-02, DATA-03, DATA-04, DATA-05, DATA-06
 **Success Criteria** (what must be TRUE):
-  1. Running a count query against the SQLite database returns 50,000+ reviews distributed across 30 neighbourhoods in Manhattan and Brooklyn
+  1. Running a count query against the SQLite database returns reviews distributed across Manhattan and Brooklyn neighbourhoods
   2. The data quality report shows every neighbourhood has reviews in at least 5 of the 7 years (2019-2025), with no neighbourhood having fewer than 500 total reviews
-  3. Boundary GeoJSON loads in a map tool (e.g., geojson.io) and displays 30 distinct neighbourhood polygons covering Manhattan and Brooklyn in WGS84 projection
-  4. Duplicate businesses across Google Places and Yelp are merged -- no business appears twice when queried by name within a 100m radius
-  5. Every stored review has all required fields populated: text, timestamp, business name, lat/lng, source platform, and neighbourhood assignment
-**Plans**: TBD
+  3. Boundary GeoJSON loads in a map tool (e.g., geojson.io) and displays distinct neighbourhood polygons covering Manhattan and Brooklyn in WGS84 projection
+  4. Every stored review has all required fields populated: text, timestamp, business name, lat/lng, source platform, and neighbourhood assignment
+  5. Quality report Phase 2 readiness verdict is READY FOR PHASE 2
+**Plans**: 5 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md — Coverage probe + pytest test scaffold + dataset decision gate
+- [ ] 01-02-PLAN.md — NTA boundary download + NTA name curation mapping
+- [ ] 01-03-PLAN.md — SQLite schema + business ingestion with spatial join
+- [ ] 01-04-PLAN.md — Review streaming ingest (NDJSON → reviews table)
+- [ ] 01-05-PLAN.md — Quality report generation + Phase 2 readiness human verification
 
 ### Phase 2: NLP Pipeline
 **Goal**: All ML computation complete -- embeddings, topics, vibe scores, sentiment, temporal drift, FAISS index, and representative quotes exported as serialized artifacts
@@ -122,7 +125,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Data Foundation | 0/? | Not started | - |
+| 1. Data Foundation | 0/5 | Not started | - |
 | 2. NLP Pipeline | 0/? | Not started | - |
 | 3. Backend API | 0/? | Not started | - |
 | 4. Core Map | 0/? | Not started | - |
