@@ -1,0 +1,10 @@
+data/raw/
+data/output/reviews.db
+data/output/data_quality_report.json
+__pycache__/
+*.pyc
+.env
+*.egg-info/
+dist/
+.pytest_cache/
+.DS_Store
