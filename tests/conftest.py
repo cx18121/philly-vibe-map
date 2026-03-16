@@ -56,19 +56,19 @@ def in_memory_db():
 
 
 # ---------------------------------------------------------------------------
-# Fixture: sample business NDJSON file (3 records)
+# Fixture: sample business NDJSON file (3 records — Philadelphia pivot)
 # ---------------------------------------------------------------------------
 @pytest.fixture
 def sample_business_ndjson(tmp_path):
     """Write 3 business records to a temp NDJSON file and return the path.
 
-    Record 1: inside NYC bbox (Manhattan, -73.98, 40.75)
-    Record 2: inside NYC bbox (Brooklyn, -73.95, 40.65)
-    Record 3: outside NYC bbox (Los Angeles, -118.25, 34.05)
+    Record 1: inside Philadelphia bbox (Fishtown area, -75.135, 39.965)
+    Record 2: inside Philadelphia bbox (Rittenhouse area, -75.175, 39.945)
+    Record 3: outside Philadelphia bbox (Los Angeles, -118.25, 34.05)
     """
     records = [
-        {"business_id": "b1", "name": "Pizza NYC", "latitude": 40.75, "longitude": -73.98, "city": "New York", "state": "NY", "attributes": {}},
-        {"business_id": "b2", "name": "Bagels Brooklyn", "latitude": 40.65, "longitude": -73.95, "city": "Brooklyn", "state": "NY", "attributes": {}},
+        {"business_id": "b1", "name": "Pizza Fishtown", "latitude": 39.965, "longitude": -75.135, "city": "Philadelphia", "state": "PA", "attributes": {}},
+        {"business_id": "b2", "name": "Coffee Rittenhouse", "latitude": 39.945, "longitude": -75.175, "city": "Philadelphia", "state": "PA", "attributes": {}},
         {"business_id": "b3", "name": "Tacos LA", "latitude": 34.05, "longitude": -118.25, "city": "Los Angeles", "state": "CA", "attributes": {}},
     ]
     ndjson_path = tmp_path / "yelp_academic_dataset_business.json"
