@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-04-PLAN.md — Streaming review ingest and ingest_stats.json sidecar
-last_updated: "2026-03-16T15:31:33Z"
+stopped_at: "Completed 01-05-PLAN.md Task 1 — quality report script; paused at checkpoint:human-verify for Phase 1 sign-off"
+last_updated: "2026-03-16T15:38:55.199Z"
 last_activity: 2026-03-16 -- Plan 01-04 complete, review ingest script committed
 progress:
   total_phases: 6
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 5
-  completed_plans: 4
+  completed_plans: 5
   percent: 20
 ---
 
@@ -54,6 +54,7 @@ Progress: [████░░░░░░] 20% (4/5 plans in Phase 1)
 | Phase 01-data-foundation P02 | 5min | 2 tasks | 5 files |
 | Phase 01-data-foundation P03 | 4min | 2 tasks | 7 files |
 | Phase 01-data-foundation P04 | 10min | 2 tasks | 4 files |
+| Phase 01-data-foundation P05 | 5min | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,8 @@ Recent decisions affecting current work:
 - [Phase 01-data-foundation]: Import alias pattern: scripts/build_schema.py and scripts/assign_neighbourhoods.py are importlib wrappers for numeric-prefix files; enables test imports without renaming pipeline scripts
 - [Phase 01-data-foundation 01-04]: ingest_stats.json sidecar chain: 03_assign_neighbourhoods writes missing_lat_lng/outside_nta; 04_ingest_reviews merges duplicate_business_id/bad_timestamp; 05_quality_report reads merged file for Section 4
 - [Phase 01-data-foundation 01-04]: FK filter via pre-loaded known_business_ids set: ~14,568 Philadelphia IDs loaded before streaming; O(1) per-review lookup during hot loop
+- [Phase 01-data-foundation]: quality_report.md committed at empty-DB state (NOT READY) — correctly reflects pipeline must be run against real Yelp data before Phase 2 gate can pass
+- [Phase 01-data-foundation]: Borough column shows Unknown for Philadelphia NEIGHBORHOOD_NUMBER codes — retained per UI-SPEC but not meaningful for Philadelphia data
 
 ### Pending Todos
 
@@ -82,6 +85,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-16T15:31:33Z
-Stopped at: Completed 01-04-PLAN.md — Streaming review ingest and ingest_stats.json sidecar
+Last session: 2026-03-16T15:38:55.182Z
+Stopped at: Completed 01-05-PLAN.md Task 1 — quality report script; paused at checkpoint:human-verify for Phase 1 sign-off
 Resume file: None

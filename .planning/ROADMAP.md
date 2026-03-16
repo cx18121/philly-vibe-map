@@ -12,7 +12,7 @@ This project delivers an interactive map of Philadelphia neighbourhood vibes der
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Data Foundation** - Collect 50k+ reviews, fetch NYC boundary GeoJSON, validate temporal coverage
+- [x] **Phase 1: Data Foundation** - Collect 50k+ reviews, fetch NYC boundary GeoJSON, validate temporal coverage (completed 2026-03-16)
 - [ ] **Phase 2: NLP Pipeline** - Embed reviews, discover topics, score vibes, build FAISS index, export all artifacts
 - [ ] **Phase 3: Backend API** - Serve pre-computed artifacts through 4 FastAPI endpoints with sub-100ms responses
 - [ ] **Phase 4: Core Map** - Render interactive choropleth with hover, click-to-detail sidebar, legend, and responsive layout
@@ -125,7 +125,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Data Foundation (Philadelphia) | 4/5 | In Progress |  |
+| 1. Data Foundation (Philadelphia) | 5/5 | Complete   | 2026-03-16 |
 | 2. NLP Pipeline | 0/? | Not started | - |
 | 3. Backend API | 0/? | Not started | - |
 | 4. Core Map | 0/? | Not started | - |
