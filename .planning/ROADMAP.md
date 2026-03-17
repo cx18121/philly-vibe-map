@@ -50,12 +50,14 @@ Plans:
   3. Temporal drift data exists for all 30 neighbourhoods across all years (2019-2025), showing at least some neighbourhoods with measurable vibe shifts over time
   4. FAISS nearest-neighbour query for any neighbourhood returns k similar neighbourhoods in under 10ms, and the results are intuitively plausible (e.g., SoHo similar to West Village, not East Harlem)
   5. Artifact export directory contains all required files (embeddings, vibe scores, temporal series, FAISS index, representative quotes, enriched GeoJSON) and each loads without error
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
-- [ ] 02-03: TBD
+- [ ] 02-01-PLAN.md — Pipeline structure, archetype config, orchestrator skeleton, and Wave 0 test scaffolds
+- [ ] 02-02-PLAN.md — Sentence-transformer embedding (NLP-01) and BERTopic topic modeling (NLP-02)
+- [ ] 02-03-PLAN.md — LoRA fine-tuned DistilBERT sentiment classifier (NLP-04)
+- [ ] 02-04-PLAN.md — Vibe archetype scoring with recency weighting (NLP-03, NLP-05) and temporal drift (NLP-06)
+- [ ] 02-05-PLAN.md — FAISS index, representative quotes, enriched GeoJSON export, and pipeline quality verification (NLP-07, NLP-08, NLP-09)
 
 ### Phase 3: Backend API
 **Goal**: A lightweight FastAPI server that loads pre-computed artifacts at startup and serves neighbourhood data, temporal series, and similarity queries with zero ML inference
@@ -126,7 +128,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Data Foundation (Philadelphia) | 5/5 | Complete   | 2026-03-16 |
-| 2. NLP Pipeline | 0/? | Not started | - |
+| 2. NLP Pipeline | 0/5 | Not started | - |
 | 3. Backend API | 0/? | Not started | - |
 | 4. Core Map | 0/? | Not started | - |
 | 5. Temporal Animation and Polish | 0/? | Not started | - |
