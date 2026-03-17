@@ -258,3 +258,183 @@ def mock_artifacts_dir(tmp_path):
 def archetypes_path():
     """Return the path to the real archetypes config file."""
     return Path("pipeline/archetypes.json")
+
+
+# ---------------------------------------------------------------------------
+# Phase 2 Export Stage Fixtures
+# ---------------------------------------------------------------------------
+
+@pytest.fixture
+def mock_export_setup(tmp_path):
+    """Create a complete mock environment for the export stage.
+
+    Returns (db_path, artifacts_dir, boundaries_geojson_path) with:
+    - SQLite DB: 3 businesses, 90 reviews (30 per neighbourhood)
+    - artifacts_dir pre-populated with: embeddings.npy, review_ids.npy,
+      topic_assignments.json, vibe_scores.json, temporal_series.json,
+      bertopic_model/, sentiment_model/
+    - A mock GeoJSON boundaries file
+    """
+    # 1. Create DB with businesses and reviews
+    db_path = str(tmp_path / "test_reviews.db")
+    conn = sqlite3.connect(db_path)
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS businesses (
+            business_id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            latitude REAL,
+            longitude REAL,
+            neighbourhood_id TEXT,
+            neighbourhood_name TEXT,
+            city TEXT,
+            state TEXT,
+            attributes TEXT
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS reviews (
+            review_id TEXT PRIMARY KEY,
+            business_id TEXT NOT NULL,
+            text TEXT NOT NULL,
+            stars INTEGER NOT NULL,
+            review_date TEXT NOT NULL,
+            source TEXT NOT NULL DEFAULT 'yelp',
+            useful INTEGER,
+            funny INTEGER,
+            cool INTEGER
+        )
+    """)
+
+    businesses = [
+        ("biz_044", "Pizza Fishtown", 39.965, -75.135, "044", "Fishtown", "Philadelphia", "PA", "{}"),
+        ("biz_116", "Coffee Rittenhouse", 39.945, -75.175, "116", "Rittenhouse", "Philadelphia", "PA", "{}"),
+        ("biz_121", "Bistro Society Hill", 39.940, -75.145, "121", "Society Hill", "Philadelphia", "PA", "{}"),
+    ]
+    conn.executemany("INSERT INTO businesses VALUES (?,?,?,?,?,?,?,?,?)", businesses)
+
+    rng = random.Random(42)
+    reviews = []
+    review_texts = [
+        "Great food and atmosphere",
+        "Lovely cafe with amazing coffee",
+        "The best brunch spot, highly recommend this place for weekend mornings",
+        "Nice bar with live music and cool vibes",
+        "Family friendly restaurant with great kids menu",
+        "Beautiful art gallery with rotating exhibits",
+        "Upscale dining experience, excellent wine list",
+        "Historic landmark worth visiting for the architecture alone",
+        "Fun nightlife scene with great cocktails",
+        "Cozy neighborhood pub with craft beer selection",
+    ]
+    review_id = 1
+    for biz_id, _, _, _, nid, nname, _, _, _ in businesses:
+        for year in [2019, 2020, 2021]:
+            for i in range(10):
+                text = review_texts[i % len(review_texts)]
+                stars = rng.randint(1, 5)
+                month = rng.randint(1, 12)
+                day = rng.randint(1, 28)
+                date_str = f"{year}-{month:02d}-{day:02d}"
+                reviews.append((
+                    str(review_id), biz_id, text, stars, date_str, "yelp",
+                    rng.randint(0, 10), rng.randint(0, 5), rng.randint(0, 5),
+                ))
+                review_id += 1
+
+    conn.executemany("INSERT INTO reviews VALUES (?,?,?,?,?,?,?,?,?)", reviews)
+    conn.commit()
+    conn.close()
+
+    # 2. Create artifacts directory with pre-computed inputs
+    artifacts_dir = tmp_path / "artifacts"
+    artifacts_dir.mkdir()
+
+    np.random.seed(42)
+
+    # embeddings.npy: (90, 384) -- one per review
+    embeddings = np.random.randn(90, 384).astype(np.float32)
+    np.save(artifacts_dir / "embeddings.npy", embeddings)
+
+    # review_ids.npy: rowids 1..90
+    review_ids = np.arange(1, 91, dtype=np.int64)
+    np.save(artifacts_dir / "review_ids.npy", review_ids)
+
+    # topic_assignments.json: assign reviews to 3 topics (0, 1, 2)
+    topic_assignments = {}
+    for rid in range(1, 91):
+        topic_assignments[str(rid)] = rid % 3
+    with open(artifacts_dir / "topic_assignments.json", "w") as f:
+        json.dump(topic_assignments, f)
+
+    # vibe_scores.json: 3 neighbourhoods with 6 archetype scores
+    vibe_scores = {
+        "044": {"artsy": 0.42, "foodie": 0.78, "nightlife": 0.35, "family": 0.60, "upscale": 0.25, "cultural": 0.50},
+        "116": {"artsy": 0.30, "foodie": 0.65, "nightlife": 0.55, "family": 0.40, "upscale": 0.70, "cultural": 0.45},
+        "121": {"artsy": 0.55, "foodie": 0.50, "nightlife": 0.20, "family": 0.50, "upscale": 0.60, "cultural": 0.75},
+    }
+    with open(artifacts_dir / "vibe_scores.json", "w") as f:
+        json.dump(vibe_scores, f, indent=2)
+
+    # temporal_series.json
+    temporal_series = {
+        nid: {str(y): scores for y in [2019, 2020, 2021]}
+        for nid, scores in vibe_scores.items()
+    }
+    with open(artifacts_dir / "temporal_series.json", "w") as f:
+        json.dump(temporal_series, f, indent=2)
+
+    # bertopic_model/ directory (stub)
+    (artifacts_dir / "bertopic_model").mkdir()
+    (artifacts_dir / "bertopic_model" / "config.json").write_text("{}")
+
+    # sentiment_model/ directory (stub)
+    (artifacts_dir / "sentiment_model").mkdir()
+    (artifacts_dir / "sentiment_model" / "config.json").write_text("{}")
+
+    # 3. Create mock boundaries GeoJSON
+    boundaries_dir = tmp_path / "data" / "boundaries"
+    boundaries_dir.mkdir(parents=True)
+    mock_geojson = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "properties": {
+                    "NEIGHBORHOOD_NUMBER": "044",
+                    "NEIGHBORHOOD_NAME": "Fishtown - Lower Kensington",
+                },
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [[[-75.14, 39.96], [-75.13, 39.96], [-75.13, 39.97], [-75.14, 39.97], [-75.14, 39.96]]],
+                },
+            },
+            {
+                "type": "Feature",
+                "properties": {
+                    "NEIGHBORHOOD_NUMBER": "116",
+                    "NEIGHBORHOOD_NAME": "Rittenhouse",
+                },
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [[[-75.18, 39.94], [-75.17, 39.94], [-75.17, 39.95], [-75.18, 39.95], [-75.18, 39.94]]],
+                },
+            },
+            {
+                "type": "Feature",
+                "properties": {
+                    "NEIGHBORHOOD_NUMBER": "121",
+                    "NEIGHBORHOOD_NAME": "Society Hill",
+                },
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [[[-75.15, 39.93], [-75.14, 39.93], [-75.14, 39.94], [-75.15, 39.94], [-75.15, 39.93]]],
+                },
+            },
+        ],
+    }
+    geojson_path = boundaries_dir / "philadelphia_neighborhoods.geojson"
+    with open(geojson_path, "w") as f:
+        json.dump(mock_geojson, f, indent=2)
+
+    return db_path, artifacts_dir, str(geojson_path)

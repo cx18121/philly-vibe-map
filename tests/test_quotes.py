@@ -13,14 +13,16 @@ ARCHETYPES = ["artsy", "foodie", "nightlife", "family", "upscale", "cultural"]
 class TestRepresentativeQuotes:
     """NLP-08: 3-5 quotes per neighbourhood per archetype, <= 300 chars."""
 
-    @pytest.mark.slow
-    def test_quotes_per_neighbourhood(self, mock_artifacts_dir):
+    def test_quotes_per_neighbourhood(self, mock_export_setup):
         """Each neighbourhood has 3-5 quotes per archetype."""
-        run_export(db_path="unused", artifacts_dir=mock_artifacts_dir)
-        path = mock_artifacts_dir / "representative_quotes.json"
+        db_path, artifacts_dir, geojson_path = mock_export_setup
+        run_export(db_path, artifacts_dir, geojson_path=geojson_path)
+
+        path = artifacts_dir / "representative_quotes.json"
         assert path.exists(), "representative_quotes.json not created"
         with open(path) as f:
             quotes = json.load(f)
+
         assert len(quotes) > 0, "No neighbourhoods in quotes file"
         for nid, archetypes in quotes.items():
             for archetype, quote_list in archetypes.items():
@@ -29,12 +31,14 @@ class TestRepresentativeQuotes:
                     f"expected 3-5 quotes, got {len(quote_list)}"
                 )
 
-    @pytest.mark.slow
-    def test_quote_max_length(self, mock_artifacts_dir):
+    def test_quote_max_length(self, mock_export_setup):
         """Every quote is <= 300 characters."""
-        run_export(db_path="unused", artifacts_dir=mock_artifacts_dir)
-        with open(mock_artifacts_dir / "representative_quotes.json") as f:
+        db_path, artifacts_dir, geojson_path = mock_export_setup
+        run_export(db_path, artifacts_dir, geojson_path=geojson_path)
+
+        with open(artifacts_dir / "representative_quotes.json") as f:
             quotes = json.load(f)
+
         for nid, archetypes in quotes.items():
             for archetype, quote_list in archetypes.items():
                 for i, quote in enumerate(quote_list):
@@ -43,12 +47,14 @@ class TestRepresentativeQuotes:
                         f"length {len(quote)} > 300"
                     )
 
-    @pytest.mark.slow
-    def test_quotes_all_archetypes(self, mock_artifacts_dir):
+    def test_quotes_all_archetypes(self, mock_export_setup):
         """All 6 archetypes present per neighbourhood."""
-        run_export(db_path="unused", artifacts_dir=mock_artifacts_dir)
-        with open(mock_artifacts_dir / "representative_quotes.json") as f:
+        db_path, artifacts_dir, geojson_path = mock_export_setup
+        run_export(db_path, artifacts_dir, geojson_path=geojson_path)
+
+        with open(artifacts_dir / "representative_quotes.json") as f:
             quotes = json.load(f)
+
         for nid, archetypes in quotes.items():
             assert set(archetypes.keys()) == set(ARCHETYPES), (
                 f"Neighbourhood {nid} archetypes {set(archetypes.keys())} "
