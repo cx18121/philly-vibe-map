@@ -24,7 +24,7 @@
 - [ ] **NLP-06**: System buckets reviews by year (2019–2025), runs the full vibe scoring pipeline per bucket (equal weights within each bucket, no decay), and produces a temporal drift time series per neighbourhood
 - [ ] **NLP-07**: System builds a FAISS flat index over neighbourhood vibe vectors to support nearest-neighbour similarity queries
 - [ ] **NLP-08**: System selects 3–5 representative review quotes per neighbourhood per vibe archetype (highest cosine similarity to archetype centroid)
-- [ ] **NLP-09**: Pipeline exports all artifacts (embeddings, vibe scores, temporal series, FAISS index, representative quotes, enriched GeoJSON) as serialized files ready for backend consumption
+- [x] **NLP-09**: Pipeline exports all artifacts (embeddings, vibe scores, temporal series, FAISS index, representative quotes, enriched GeoJSON) as serialized files ready for backend consumption
 
 ### Backend API
 
@@ -115,7 +115,7 @@
 | NLP-06 | Phase 2 | Pending |
 | NLP-07 | Phase 2 | Pending |
 | NLP-08 | Phase 2 | Pending |
-| NLP-09 | Phase 2 | Pending |
+| NLP-09 | Phase 2 | Complete |
 | API-01 | Phase 3 | Pending |
 | API-02 | Phase 3 | Pending |
 | API-03 | Phase 3 | Pending |

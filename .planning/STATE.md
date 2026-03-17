@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: "Completed 01-05-PLAN.md Task 1 — quality report script; paused at checkpoint:human-verify for Phase 1 sign-off"
-last_updated: "2026-03-16T15:38:55.199Z"
-last_activity: 2026-03-16 -- All 5 Phase 1 plans complete; awaiting human sign-off on quality report
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-03-17T17:51:32.928Z"
+last_activity: 2026-03-17 -- Plan 02-01 complete, pipeline scaffold and test scaffolds committed
 progress:
   total_phases: 6
   completed_phases: 1
-  total_plans: 5
-  completed_plans: 5
-  percent: 20
+  total_plans: 10
+  completed_plans: 6
+  percent: 60
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-16)
 
 **Core value:** An interactive map where anyone can feel the character of a New York City neighbourhood through its reviews -- and watch how that character has shifted year by year from 2019 to 2025.
-**Current focus:** Phase 1: Data Foundation
+**Current focus:** Phase 2: NLP Pipeline
 
 ## Current Position
 
-Phase: 1 of 6 (Data Foundation)
-Plan: 4 of 5 complete in current phase (01-01 done, 01-02 done, 01-03 done, 01-04 done)
+Phase: 2 of 6 (NLP Pipeline)
+Plan: 1 of 5 complete in current phase (02-01 done)
 Status: In progress
-Last activity: 2026-03-16 -- Plan 01-04 complete, review ingest script committed
+Last activity: 2026-03-17 -- Plan 02-01 complete, pipeline scaffold and test scaffolds committed
 
-Progress: [████░░░░░░] 20% (4/5 plans in Phase 1)
+Progress: [██████░░░░] 60% (6/10 plans across all phases)
 
 ## Performance Metrics
 
@@ -55,6 +55,7 @@ Progress: [████░░░░░░] 20% (4/5 plans in Phase 1)
 | Phase 01-data-foundation P03 | 4min | 2 tasks | 7 files |
 | Phase 01-data-foundation P04 | 10min | 2 tasks | 4 files |
 | Phase 01-data-foundation P05 | 5min | 1 tasks | 3 files |
+| Phase 02-nlp-pipeline P01 | 5min | 2 tasks | 22 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,8 @@ Recent decisions affecting current work:
 - [Phase 01-data-foundation 01-04]: FK filter via pre-loaded known_business_ids set: ~14,568 Philadelphia IDs loaded before streaming; O(1) per-review lookup during hot loop
 - [Phase 01-data-foundation]: quality_report.md committed at empty-DB state (NOT READY) — correctly reflects pipeline must be run against real Yelp data before Phase 2 gate can pass
 - [Phase 01-data-foundation]: Borough column shows Unknown for Philadelphia NEIGHBORHOOD_NUMBER codes — retained per UI-SPEC but not meaningful for Philadelphia data
+- [Phase 02-nlp-pipeline 02-01]: Stage modules use consistent interface: run_<stage>(db_path, artifacts_dir, force) -> dict with artifact gating
+- [Phase 02-nlp-pipeline 02-01]: Registered pytest.mark.slow marker for ML tests requiring full pipeline execution
 
 ### Pending Todos
 
@@ -85,6 +88,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-16T15:38:55.182Z
-Stopped at: Completed 01-05-PLAN.md Task 1 — quality report script; paused at checkpoint:human-verify for Phase 1 sign-off
+Last session: 2026-03-17T17:51:32.867Z
+Stopped at: Completed 02-01-PLAN.md
 Resume file: None
