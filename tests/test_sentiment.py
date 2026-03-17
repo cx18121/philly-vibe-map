@@ -6,8 +6,47 @@ import pytest
 from pipeline.stages.sentiment import run_sentiment
 
 
+class TestStarMapping:
+    """NLP-04: Star rating remapping to 3-class sentiment."""
+
+    def test_stars_1_maps_to_negative(self):
+        from pipeline.stages.sentiment import _stars_to_label
+        assert _stars_to_label(1) == 0
+
+    def test_stars_2_maps_to_negative(self):
+        from pipeline.stages.sentiment import _stars_to_label
+        assert _stars_to_label(2) == 0
+
+    def test_stars_3_maps_to_neutral(self):
+        from pipeline.stages.sentiment import _stars_to_label
+        assert _stars_to_label(3) == 1
+
+    def test_stars_4_maps_to_positive(self):
+        from pipeline.stages.sentiment import _stars_to_label
+        assert _stars_to_label(4) == 2
+
+    def test_stars_5_maps_to_positive(self):
+        from pipeline.stages.sentiment import _stars_to_label
+        assert _stars_to_label(5) == 2
+
+
 class TestLoRAConfig:
     """NLP-04: LoRA configuration is valid for DistilBERT."""
+
+    def test_lora_config_constants(self):
+        """Verify the module exposes expected LoRA hyperparameters."""
+        from pipeline.stages.sentiment import (
+            MODEL_NAME,
+            TRAIN_EPOCHS,
+            TRAIN_BATCH_SIZE,
+            LEARNING_RATE,
+            MAX_SEQ_LENGTH,
+        )
+        assert MODEL_NAME == "distilbert-base-uncased"
+        assert TRAIN_EPOCHS == 3
+        assert TRAIN_BATCH_SIZE == 32
+        assert LEARNING_RATE == 2e-4
+        assert MAX_SEQ_LENGTH == 256
 
     @pytest.mark.slow
     def test_lora_config_valid(self):
@@ -34,6 +73,24 @@ class TestLoRAConfig:
             "distilbert-base-uncased", num_labels=3
         )
         assert model.config.num_labels == 3
+
+
+class TestArtifactGate:
+    """NLP-04: Stage skips if sentiment_model/ already exists."""
+
+    def test_skips_when_model_dir_exists(self, mock_artifacts_dir):
+        """run_sentiment returns {skipped: True} if sentiment_model/ exists."""
+        (mock_artifacts_dir / "sentiment_model").mkdir()
+        result = run_sentiment(db_path="unused", artifacts_dir=mock_artifacts_dir)
+        assert result == {"skipped": True}
+
+    def test_does_not_skip_when_force(self, mock_artifacts_dir):
+        """run_sentiment does not skip even if dir exists when force=True."""
+        (mock_artifacts_dir / "sentiment_model").mkdir()
+        # With force=True and no actual data, it should attempt to run
+        # (and fail because there's no Yelp data). We just verify it doesn't return skipped.
+        with pytest.raises(Exception):
+            run_sentiment(db_path="unused", artifacts_dir=mock_artifacts_dir, force=True)
 
 
 class TestMergedModel:
