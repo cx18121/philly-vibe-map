@@ -2,8 +2,14 @@
 from __future__ import annotations
 
 import datetime
+import glob
+import json
+import sqlite3
 import sys
 from pathlib import Path
+
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 
 
 _ANSI = {"WARN": "\033[93m", "FAIL": "\033[91m", "INFO": ""}
@@ -11,13 +17,231 @@ _RESET = "\033[0m"
 
 
 def _log(level: str, msg: str) -> None:
-    ts = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    ts = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S")
     color = _ANSI.get(level, "") if sys.stdout.isatty() else ""
     reset = _RESET if color else ""
     print(f"{color}[{level}] {ts}  {msg}{reset}", flush=True)
 
 
-def run_export(db_path: str, artifacts_dir: Path, force: bool = False) -> dict:
+# ---------------------------------------------------------------------------
+# Expected artifacts for final validation (NLP-09)
+# ---------------------------------------------------------------------------
+
+EXPECTED_ARTIFACTS = [
+    "embeddings.npy",
+    "review_ids.npy",
+    "bertopic_model",
+    "topic_assignments.json",
+    "vibe_scores.json",
+    "temporal_series.json",
+    "faiss_index.bin",
+    "faiss_id_map.json",
+    "representative_quotes.json",
+    "sentiment_model",
+    "enriched_geojson.geojson",
+]
+
+
+# ---------------------------------------------------------------------------
+# Sub-stage A: FAISS Index (NLP-07)
+# ---------------------------------------------------------------------------
+
+def _build_faiss_index(
+    vibe_scores: dict[str, dict[str, float]],
+    artifacts_dir: Path,
+) -> "faiss.IndexFlatIP":
+    """Build FAISS flat index over L2-normalized 6D vibe vectors.
+
+    Args:
+        vibe_scores: {neighbourhood_id: {archetype: score}}
+        artifacts_dir: output directory
+
+    Returns:
+        The built FAISS index.
+    """
+    import faiss
+
+    archetype_order = ["artsy", "foodie", "nightlife", "family", "upscale", "cultural"]
+    sorted_nids = sorted(vibe_scores.keys())
+
+    vibe_matrix = np.array(
+        [[vibe_scores[nid][a] for a in archetype_order] for nid in sorted_nids],
+        dtype=np.float32,
+    )
+
+    faiss.normalize_L2(vibe_matrix)  # in-place L2 normalization for cosine similarity
+    index = faiss.IndexFlatIP(6)  # 6 vibe dimensions, inner product
+    index.add(vibe_matrix)
+    faiss.write_index(index, str(artifacts_dir / "faiss_index.bin"))
+    _log("INFO", f"FAISS index built: {index.ntotal} vectors, dim={index.d}")
+
+    # Save ID map: integer index -> neighbourhood_id
+    faiss_id_map = {i: nid for i, nid in enumerate(sorted_nids)}
+    with open(artifacts_dir / "faiss_id_map.json", "w") as f:
+        json.dump(faiss_id_map, f, indent=2)
+    _log("INFO", f"FAISS ID map saved: {len(faiss_id_map)} entries")
+
+    return index
+
+
+# ---------------------------------------------------------------------------
+# Sub-stage B: Representative Quotes (NLP-08)
+# ---------------------------------------------------------------------------
+
+def _select_representative_quotes(
+    db_path: str,
+    artifacts_dir: Path,
+    vibe_scores: dict[str, dict[str, float]],
+) -> dict:
+    """Select 3-5 representative quotes per neighbourhood per archetype.
+
+    Quotes are ranked by cosine similarity of the review embedding
+    to the archetype centroid embedding. Truncated to 300 chars max.
+
+    Returns:
+        {neighbourhood_id: {archetype: [quote_text, ...]}}
+    """
+    from sentence_transformers import SentenceTransformer
+
+    # Load embeddings and review IDs
+    embeddings = np.load(artifacts_dir / "embeddings.npy")
+    review_ids = np.load(artifacts_dir / "review_ids.npy")
+
+    # Load archetype seed phrases and compute centroids
+    archetypes_path = Path(__file__).parent.parent / "archetypes.json"
+    with open(archetypes_path) as f:
+        archetypes = json.load(f)
+
+    model = SentenceTransformer("all-MiniLM-L6-v2")
+    archetype_centroids: dict[str, np.ndarray] = {}
+    for name, phrases in archetypes.items():
+        phrase_embs = model.encode(phrases)
+        archetype_centroids[name] = phrase_embs.mean(axis=0)
+
+    _log("INFO", f"Computed {len(archetype_centroids)} archetype centroids for quote selection")
+
+    # Load review texts and neighbourhood mappings from DB
+    conn = sqlite3.connect(db_path)
+    review_data: dict[int, tuple[str, str]] = {}  # {rowid: (text, neighbourhood_id)}
+    for row in conn.execute("""
+        SELECT r.rowid, r.text, b.neighbourhood_id
+        FROM reviews r
+        JOIN businesses b ON r.business_id = b.business_id
+        WHERE b.neighbourhood_id IS NOT NULL
+    """):
+        review_data[row[0]] = (row[1], row[2])
+    conn.close()
+
+    _log("INFO", f"Loaded {len(review_data)} reviews for quote selection")
+
+    # Build index: review_ids entry -> position in embeddings array
+    rid_to_idx: dict[int, int] = {}
+    for idx, rid in enumerate(review_ids):
+        rid_to_idx[int(rid)] = idx
+
+    sorted_nids = sorted(vibe_scores.keys())
+    quotes: dict[str, dict[str, list[str]]] = {}
+
+    for nid in sorted_nids:
+        quotes[nid] = {}
+
+        # Get embedding indices for reviews in this neighbourhood
+        nid_indices = []
+        nid_rids = []
+        for rid, (text, rid_nid) in review_data.items():
+            if rid_nid == nid and rid in rid_to_idx:
+                nid_indices.append(rid_to_idx[rid])
+                nid_rids.append(rid)
+
+        if not nid_indices:
+            for arch_name in archetypes:
+                quotes[nid][arch_name] = []
+            continue
+
+        nid_embeddings = embeddings[nid_indices]
+
+        for arch_name, arch_centroid in archetype_centroids.items():
+            sims = cosine_similarity(
+                nid_embeddings, arch_centroid.reshape(1, -1)
+            ).flatten()
+            top_k = min(5, len(sims))
+            top_indices = np.argsort(sims)[-top_k:][::-1]  # descending similarity
+
+            arch_quotes = []
+            for ti in top_indices:
+                rid = nid_rids[ti]
+                text = review_data[rid][0]
+                # Truncate to 300 chars
+                if len(text) > 300:
+                    text = text[:297] + "..."
+                arch_quotes.append(text)
+
+            quotes[nid][arch_name] = arch_quotes
+
+    # Save
+    with open(artifacts_dir / "representative_quotes.json", "w") as f:
+        json.dump(quotes, f, indent=2)
+
+    _log("INFO", f"Representative quotes saved: {len(quotes)} neighbourhoods")
+    return quotes
+
+
+# ---------------------------------------------------------------------------
+# Sub-stage C: Enriched GeoJSON (NLP-09 partial)
+# ---------------------------------------------------------------------------
+
+def _build_enriched_geojson(
+    vibe_scores: dict[str, dict[str, float]],
+    artifacts_dir: Path,
+    geojson_path: str | None = None,
+) -> None:
+    """Inject vibe scores into GeoJSON feature properties.
+
+    Searches for the Philadelphia boundaries GeoJSON file and enriches
+    each feature whose NEIGHBORHOOD_NUMBER matches a vibe_scores key.
+    """
+    # Find GeoJSON boundaries file
+    if geojson_path is None:
+        candidates = (
+            glob.glob("scripts/data/boundaries/*.geojson")
+            + glob.glob("data/boundaries/*.geojson")
+        )
+        if not candidates:
+            _log("WARN", "No boundaries GeoJSON found -- skipping enriched GeoJSON")
+            return
+        geojson_path = candidates[0]
+
+    _log("INFO", f"Loading boundaries GeoJSON from {geojson_path}")
+    with open(geojson_path) as f:
+        geojson = json.load(f)
+
+    enriched_count = 0
+    for feature in geojson["features"]:
+        nid = feature["properties"].get("NEIGHBORHOOD_NUMBER")
+        if nid and nid in vibe_scores:
+            scores = vibe_scores[nid]
+            feature["properties"]["vibe_scores"] = scores
+            dominant = max(scores, key=scores.get)
+            feature["properties"]["dominant_vibe"] = dominant
+            feature["properties"]["dominant_vibe_score"] = scores[dominant]
+            enriched_count += 1
+
+    with open(artifacts_dir / "enriched_geojson.geojson", "w") as f:
+        json.dump(geojson, f, indent=2)
+
+    _log("INFO", f"Enriched GeoJSON saved: {enriched_count}/{len(geojson['features'])} features enriched")
+
+
+# ---------------------------------------------------------------------------
+# Main stage entry point
+# ---------------------------------------------------------------------------
+
+def run_export(
+    db_path: str,
+    artifacts_dir: Path,
+    force: bool = False,
+    geojson_path: str | None = None,
+) -> dict:
     """Build FAISS index, select representative quotes, export enriched GeoJSON.
 
     Outputs:
@@ -32,4 +256,33 @@ def run_export(db_path: str, artifacts_dir: Path, force: bool = False) -> dict:
         return {"skipped": True}
 
     _log("INFO", "Stage 'export': starting...")
-    raise NotImplementedError("Stage not yet implemented")
+
+    # Load vibe scores (input from vibe_score stage)
+    with open(artifacts_dir / "vibe_scores.json") as f:
+        vibe_scores = json.load(f)
+    _log("INFO", f"Loaded vibe scores for {len(vibe_scores)} neighbourhoods")
+
+    # Sub-stage A: FAISS Index (NLP-07)
+    index = _build_faiss_index(vibe_scores, artifacts_dir)
+
+    # Sub-stage B: Representative Quotes (NLP-08)
+    quotes = _select_representative_quotes(db_path, artifacts_dir, vibe_scores)
+
+    # Sub-stage C: Enriched GeoJSON (NLP-09 partial)
+    _build_enriched_geojson(vibe_scores, artifacts_dir, geojson_path)
+
+    # Final artifact validation (NLP-09)
+    missing = [a for a in EXPECTED_ARTIFACTS if not (artifacts_dir / a).exists()]
+    if missing:
+        _log("WARN", f"Missing artifacts: {missing}")
+    else:
+        _log("INFO", "All 11 artifacts present -- pipeline complete")
+
+    _log("INFO", "Stage 'export': complete")
+
+    return {
+        "skipped": False,
+        "faiss_ntotal": index.ntotal,
+        "quote_neighbourhoods": len(quotes),
+        "missing_artifacts": missing,
+    }
