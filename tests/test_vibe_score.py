@@ -64,25 +64,30 @@ class TestRecencyWeighting:
         w = compute_recency_weight("2022-01-16", "2024-01-15")
         assert abs(w - 0.25) < 0.01, f"730-day weight should be ~0.25, got {w}"
 
-    def test_recency_weight_10_years_clamped(self):
-        """A review 10 years old gets clamped to 1e-6."""
-        w = compute_recency_weight("2014-01-15", "2024-01-15")
+    def test_recency_weight_very_old_clamped(self):
+        """A review 20 years old gets clamped to 1e-6 (2^-20 ~ 9.5e-7 < 1e-6)."""
+        w = compute_recency_weight("2004-01-15", "2024-01-15")
         assert w == pytest.approx(1e-6, abs=1e-9), (
-            f"10-year-old review weight should be clamped to 1e-6, got {w}"
+            f"20-year-old review weight should be clamped to 1e-6, got {w}"
         )
 
     def test_recency_weight_uses_log_space(self):
         """Verify the log-space formula: log_weight = -lambda * delta_days."""
-        # Manually compute expected value using log-space
+        from datetime import datetime
+
+        # Use two concrete dates and compute expected via the log-space formula
+        review_date = "2023-01-15"
+        ref_date = "2024-06-15"
+        delta_days = (datetime.strptime(ref_date, "%Y-%m-%d")
+                      - datetime.strptime(review_date, "%Y-%m-%d")).days
+
         half_life = 365
-        delta_days = 500
         decay_lambda = math.log(2) / half_life
         log_weight = -decay_lambda * delta_days
         expected = max(math.exp(log_weight), 1e-6)
 
-        # Dates that are 500 days apart
-        w = compute_recency_weight("2022-09-03", "2024-01-15", half_life_days=half_life)
-        assert abs(w - expected) < 1e-6, (
+        w = compute_recency_weight(review_date, ref_date, half_life_days=half_life)
+        assert abs(w - expected) < 1e-9, (
             f"Log-space weight mismatch: got {w}, expected {expected}"
         )
 
