@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-01-PLAN.md
-last_updated: "2026-03-17T17:51:32.928Z"
-last_activity: 2026-03-17 -- Plan 02-01 complete, pipeline scaffold and test scaffolds committed
+stopped_at: Completed 02-02-PLAN.md
+last_updated: "2026-03-17T18:02:00.000Z"
+last_activity: 2026-03-17 -- Plan 02-02 complete, embedding and topic modeling stages implemented
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 10
-  completed_plans: 6
-  percent: 60
+  completed_plans: 7
+  percent: 70
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 ## Current Position
 
 Phase: 2 of 6 (NLP Pipeline)
-Plan: 1 of 5 complete in current phase (02-01 done)
+Plan: 2 of 5 complete in current phase (02-02 done)
 Status: In progress
-Last activity: 2026-03-17 -- Plan 02-01 complete, pipeline scaffold and test scaffolds committed
+Last activity: 2026-03-17 -- Plan 02-02 complete, embedding and topic modeling stages implemented
 
-Progress: [██████░░░░] 60% (6/10 plans across all phases)
+Progress: [███████░░░] 70% (7/10 plans across all phases)
 
 ## Performance Metrics
 
@@ -56,6 +56,7 @@ Progress: [██████░░░░] 60% (6/10 plans across all phases)
 | Phase 01-data-foundation P04 | 10min | 2 tasks | 4 files |
 | Phase 01-data-foundation P05 | 5min | 1 tasks | 3 files |
 | Phase 02-nlp-pipeline P01 | 5min | 2 tasks | 22 files |
+| Phase 02-nlp-pipeline P02 | 9min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -76,6 +77,8 @@ Recent decisions affecting current work:
 - [Phase 01-data-foundation]: Borough column shows Unknown for Philadelphia NEIGHBORHOOD_NUMBER codes — retained per UI-SPEC but not meaningful for Philadelphia data
 - [Phase 02-nlp-pipeline 02-01]: Stage modules use consistent interface: run_<stage>(db_path, artifacts_dir, force) -> dict with artifact gating
 - [Phase 02-nlp-pipeline 02-01]: Registered pytest.mark.slow marker for ML tests requiring full pipeline execution
+- [Phase 02-nlp-pipeline 02-02]: Chunked SQLite reading via iter_reviews with fetchmany(50_000) for memory-efficient embedding of 1.1M reviews
+- [Phase 02-nlp-pipeline 02-02]: BERTopic receives pre-computed embeddings to avoid re-embedding; texts loaded separately for c-TF-IDF alignment
 
 ### Pending Todos
 
@@ -88,6 +91,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T17:51:32.867Z
-Stopped at: Completed 02-01-PLAN.md
+Last session: 2026-03-17T18:02:00.000Z
+Stopped at: Completed 02-02-PLAN.md
 Resume file: None

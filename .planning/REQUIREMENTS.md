@@ -16,8 +16,8 @@
 
 ### NLP Pipeline
 
-- [ ] **NLP-01**: System embeds all reviews using a sentence-transformer model (`all-MiniLM-L6-v2` baseline, with evaluation gate before proceeding)
-- [ ] **NLP-02**: System runs BERTopic on review embeddings to discover neighbourhood-specific topics without predefined categories (HDBSCAN tuned for short text: `min_cluster_size=10`, `min_samples=3`, with `reduce_outliers()`)
+- [x] **NLP-01**: System embeds all reviews using a sentence-transformer model (`all-MiniLM-L6-v2` baseline, with evaluation gate before proceeding)
+- [x] **NLP-02**: System runs BERTopic on review embeddings to discover neighbourhood-specific topics without predefined categories (HDBSCAN tuned for short text: `min_cluster_size=10`, `min_samples=3`, with `reduce_outliers()`)
 - [ ] **NLP-03**: System scores each neighbourhood against 6 vibe archetypes (artsy, foodie, nightlife, family, upscale, cultural) via cosine similarity between topic cluster centroids and archetype seed phrase embeddings
 - [ ] **NLP-04**: System domain-adapts a sentiment classifier using LoRA fine-tuning on DistilBERT with the Yelp Open Dataset (star ratings as labels), merging adapter weights before export
 - [ ] **NLP-05**: System computes recency-weighted vibe scores using exponential decay on review timestamps (half-life configurable; computation in log-space with minimum weight clamp of 1e-6)
@@ -107,8 +107,8 @@
 | DATA-04 | Phase 1 | Complete |
 | DATA-05 | Phase 1 | Complete |
 | DATA-06 | Phase 1 | Complete |
-| NLP-01 | Phase 2 | Pending |
-| NLP-02 | Phase 2 | Pending |
+| NLP-01 | Phase 2 | Complete |
+| NLP-02 | Phase 2 | Complete |
 | NLP-03 | Phase 2 | Pending |
 | NLP-04 | Phase 2 | Pending |
 | NLP-05 | Phase 2 | Pending |
