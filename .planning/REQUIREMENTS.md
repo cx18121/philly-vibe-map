@@ -18,10 +18,10 @@
 
 - [x] **NLP-01**: System embeds all reviews using a sentence-transformer model (`all-MiniLM-L6-v2` baseline, with evaluation gate before proceeding)
 - [x] **NLP-02**: System runs BERTopic on review embeddings to discover neighbourhood-specific topics without predefined categories (HDBSCAN tuned for short text: `min_cluster_size=10`, `min_samples=3`, with `reduce_outliers()`)
-- [ ] **NLP-03**: System scores each neighbourhood against 6 vibe archetypes (artsy, foodie, nightlife, family, upscale, cultural) via cosine similarity between topic cluster centroids and archetype seed phrase embeddings
+- [x] **NLP-03**: System scores each neighbourhood against 6 vibe archetypes (artsy, foodie, nightlife, family, upscale, cultural) via cosine similarity between topic cluster centroids and archetype seed phrase embeddings
 - [x] **NLP-04**: System domain-adapts a sentiment classifier using LoRA fine-tuning on DistilBERT with the Yelp Open Dataset (star ratings as labels), merging adapter weights before export
-- [ ] **NLP-05**: System computes recency-weighted vibe scores using exponential decay on review timestamps (half-life configurable; computation in log-space with minimum weight clamp of 1e-6)
-- [ ] **NLP-06**: System buckets reviews by year (2019–2025), runs the full vibe scoring pipeline per bucket (equal weights within each bucket, no decay), and produces a temporal drift time series per neighbourhood
+- [x] **NLP-05**: System computes recency-weighted vibe scores using exponential decay on review timestamps (half-life configurable; computation in log-space with minimum weight clamp of 1e-6)
+- [x] **NLP-06**: System buckets reviews by year (2019–2025), runs the full vibe scoring pipeline per bucket (equal weights within each bucket, no decay), and produces a temporal drift time series per neighbourhood
 - [ ] **NLP-07**: System builds a FAISS flat index over neighbourhood vibe vectors to support nearest-neighbour similarity queries
 - [ ] **NLP-08**: System selects 3–5 representative review quotes per neighbourhood per vibe archetype (highest cosine similarity to archetype centroid)
 - [x] **NLP-09**: Pipeline exports all artifacts (embeddings, vibe scores, temporal series, FAISS index, representative quotes, enriched GeoJSON) as serialized files ready for backend consumption
@@ -109,10 +109,10 @@
 | DATA-06 | Phase 1 | Complete |
 | NLP-01 | Phase 2 | Complete |
 | NLP-02 | Phase 2 | Complete |
-| NLP-03 | Phase 2 | Pending |
+| NLP-03 | Phase 2 | Complete |
 | NLP-04 | Phase 2 | Complete |
-| NLP-05 | Phase 2 | Pending |
-| NLP-06 | Phase 2 | Pending |
+| NLP-05 | Phase 2 | Complete |
+| NLP-06 | Phase 2 | Complete |
 | NLP-07 | Phase 2 | Pending |
 | NLP-08 | Phase 2 | Pending |
 | NLP-09 | Phase 2 | Complete |

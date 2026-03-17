@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-03-PLAN.md
-last_updated: "2026-03-17T18:12:04.870Z"
-last_activity: 2026-03-17 -- Plan 02-03 complete, LoRA sentiment fine-tuning stage implemented
+stopped_at: Completed 02-04-PLAN.md
+last_updated: "2026-03-17T18:23:00Z"
+last_activity: 2026-03-17 -- Plan 02-04 complete, vibe scoring and temporal drift stages implemented
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 10
-  completed_plans: 8
-  percent: 80
+  completed_plans: 9
+  percent: 90
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 ## Current Position
 
 Phase: 2 of 6 (NLP Pipeline)
-Plan: 3 of 5 complete in current phase (02-03 done)
+Plan: 4 of 5 complete in current phase (02-04 done)
 Status: In progress
-Last activity: 2026-03-17 -- Plan 02-03 complete, LoRA sentiment fine-tuning stage implemented
+Last activity: 2026-03-17 -- Plan 02-04 complete, vibe scoring and temporal drift stages implemented
 
-Progress: [████████░░] 80% (8/10 plans across all phases)
+Progress: [█████████░] 90% (9/10 plans across all phases)
 
 ## Performance Metrics
 
@@ -58,6 +58,7 @@ Progress: [████████░░] 80% (8/10 plans across all phases)
 | Phase 02-nlp-pipeline P01 | 5min | 2 tasks | 22 files |
 | Phase 02-nlp-pipeline P02 | 9min | 2 tasks | 4 files |
 | Phase 02-nlp-pipeline P03 | 6min | 1 tasks | 2 files |
+| Phase 02-nlp-pipeline P04 | 9min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,8 @@ Recent decisions affecting current work:
 - [Phase 02-nlp-pipeline 02-02]: Chunked SQLite reading via iter_reviews with fetchmany(50_000) for memory-efficient embedding of 1.1M reviews
 - [Phase 02-nlp-pipeline 02-02]: BERTopic receives pre-computed embeddings to avoid re-embedding; texts loaded separately for c-TF-IDF alignment
 - [Phase 02-nlp-pipeline]: WeightedTrainer with CrossEntropyLoss for class-balanced sentiment training; CPU fallback auto-limits to 500K samples
+- [Phase 02-nlp-pipeline 02-04]: Recency weighting uses log-space exponential decay (log_weight = -lambda * delta_days) with 1e-6 min clamp; temporal year buckets use equal weight per review
+- [Phase 02-nlp-pipeline 02-04]: Exported reusable helpers (compute_recency_weight, compute_topic_centroids, score_neighbourhood_vibes) for cross-stage sharing
 
 ### Pending Todos
 
@@ -93,6 +96,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T18:12:04.808Z
-Stopped at: Completed 02-03-PLAN.md
+Last session: 2026-03-17T18:23:00Z
+Stopped at: Completed 02-04-PLAN.md
 Resume file: None
