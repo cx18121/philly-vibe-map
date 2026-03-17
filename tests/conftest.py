@@ -1,13 +1,15 @@
-"""Shared pytest fixtures for Phase 1 tests."""
+"""Shared pytest fixtures for Phase 1 and Phase 2 (NLP pipeline) tests."""
 from __future__ import annotations
 
 import io
 import json
+import random
 import sqlite3
 import tempfile
 from pathlib import Path
 
 import geopandas as gpd
+import numpy as np
 import orjson
 import pytest
 from shapely.geometry import box
@@ -122,3 +124,137 @@ def sample_nta_gdf():
     }
     gdf = gpd.GeoDataFrame(data, crs="EPSG:4326")
     return gdf
+
+
+# ---------------------------------------------------------------------------
+# Phase 2 Fixtures: NLP Pipeline
+# ---------------------------------------------------------------------------
+
+_REVIEW_TEMPLATES = [
+    "Great food and atmosphere in {neighbourhood}",
+    "Lovely cafe with amazing coffee in {neighbourhood}",
+    "The best brunch spot in {neighbourhood}, highly recommend",
+    "Nice bar with live music in {neighbourhood}",
+    "Family friendly restaurant in {neighbourhood}",
+    "Beautiful art gallery in {neighbourhood}",
+    "Upscale dining experience in {neighbourhood}",
+    "Historic landmark worth visiting in {neighbourhood}",
+    "Fun nightlife scene in {neighbourhood}",
+    "Cozy neighborhood pub in {neighbourhood}",
+]
+
+_NEIGHBOURHOODS = [
+    ("044", "Fishtown - Lower Kensington"),
+    ("116", "Rittenhouse"),
+    ("121", "Society Hill"),
+]
+
+
+@pytest.fixture
+def mock_db_with_reviews(tmp_path):
+    """Create a temp SQLite DB with Phase 1 schema, 3 businesses, and 90 reviews.
+
+    3 businesses (neighbourhoods 044, 116, 121) with 30 reviews each:
+    10 reviews per neighbourhood per year (2019, 2020, 2021).
+    Returns the DB path string.
+    """
+    db_path = str(tmp_path / "test_reviews.db")
+    conn = sqlite3.connect(db_path)
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS businesses (
+            business_id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            latitude REAL,
+            longitude REAL,
+            neighbourhood_id TEXT,
+            neighbourhood_name TEXT,
+            city TEXT,
+            state TEXT,
+            attributes TEXT
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS reviews (
+            review_id TEXT PRIMARY KEY,
+            business_id TEXT NOT NULL,
+            text TEXT NOT NULL,
+            stars INTEGER NOT NULL,
+            review_date TEXT NOT NULL,
+            source TEXT NOT NULL DEFAULT 'yelp',
+            useful INTEGER,
+            funny INTEGER,
+            cool INTEGER
+        )
+    """)
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_reviews_business ON reviews(business_id)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_reviews_date ON reviews(review_date)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_businesses_neighbourhood ON businesses(neighbourhood_id)")
+
+    # Insert 3 businesses
+    businesses = [
+        ("biz_044", "Pizza Fishtown", 39.965, -75.135, "044", "Fishtown - Lower Kensington", "Philadelphia", "PA", "{}"),
+        ("biz_116", "Coffee Rittenhouse", 39.945, -75.175, "116", "Rittenhouse", "Philadelphia", "PA", "{}"),
+        ("biz_121", "Bistro Society Hill", 39.940, -75.145, "121", "Society Hill", "Philadelphia", "PA", "{}"),
+    ]
+    conn.executemany(
+        "INSERT INTO businesses VALUES (?,?,?,?,?,?,?,?,?)",
+        businesses,
+    )
+
+    # Insert 90 reviews: 30 per business, 10 per year (2019, 2020, 2021)
+    rng = random.Random(42)
+    review_id = 1
+    reviews = []
+    for biz_id, _, _, _, nid, nname, _, _, _ in businesses:
+        for year in [2019, 2020, 2021]:
+            for i in range(10):
+                template = _REVIEW_TEMPLATES[i % len(_REVIEW_TEMPLATES)]
+                text = template.format(neighbourhood=nname)
+                stars = rng.randint(1, 5)
+                month = rng.randint(1, 12)
+                day = rng.randint(1, 28)
+                date_str = f"{year}-{month:02d}-{day:02d}"
+                reviews.append((
+                    str(review_id), biz_id, text, stars, date_str, "yelp",
+                    rng.randint(0, 10), rng.randint(0, 5), rng.randint(0, 5),
+                ))
+                review_id += 1
+
+    conn.executemany(
+        "INSERT INTO reviews VALUES (?,?,?,?,?,?,?,?,?)",
+        reviews,
+    )
+    conn.commit()
+    conn.close()
+    return db_path
+
+
+@pytest.fixture
+def mock_embeddings(tmp_path):
+    """Create mock embeddings.npy (90, 384) and review_ids.npy (90,).
+
+    Returns the tmp artifacts directory Path.
+    """
+    artifacts_dir = tmp_path / "artifacts"
+    artifacts_dir.mkdir()
+    np.random.seed(42)
+    embeddings = np.random.randn(90, 384).astype(np.float32)
+    review_ids = np.arange(1, 91, dtype=np.int64)
+    np.save(artifacts_dir / "embeddings.npy", embeddings)
+    np.save(artifacts_dir / "review_ids.npy", review_ids)
+    return artifacts_dir
+
+
+@pytest.fixture
+def mock_artifacts_dir(tmp_path):
+    """Return an empty artifacts directory (created)."""
+    artifacts_dir = tmp_path / "artifacts"
+    artifacts_dir.mkdir()
+    return artifacts_dir
+
+
+@pytest.fixture
+def archetypes_path():
+    """Return the path to the real archetypes config file."""
+    return Path("pipeline/archetypes.json")
