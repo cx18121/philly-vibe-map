@@ -215,6 +215,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     try:
+        sys.path.insert(0, str(Path(__file__).parent.parent))
         from scripts.build_schema import build_schema
         build_schema(args.db)
         result = assign_neighbourhoods(str(business_file), args.db)

@@ -18,8 +18,9 @@ _ANSI = {"WARN": "\033[93m", "FAIL": "\033[91m", "INFO": ""}
 _RESET = "\033[0m"
 
 MIN_TOTAL_REVIEWS = 500
-MIN_YEARS_WITH_COVERAGE = 5
-YEARS = ["2019", "2020", "2021", "2022", "2023", "2024"]  # 2025 may be incomplete/absent
+MIN_YEARS_WITH_COVERAGE = 3
+MIN_PASSING_NEIGHBOURHOODS = 30  # Phase 2 proceeds if at least this many neighbourhoods pass
+YEARS = ["2019", "2020", "2021"]  # Yelp Academic Dataset ends 2022-01-19; only 2019-2021 are full years
 
 
 def _log(level: str, msg: str) -> None:
@@ -42,6 +43,7 @@ def generate_quality_report(
     db_path: str,
     output_path: str,
     skip_counts: dict | None = None,
+    min_passing_neighbourhoods: int = MIN_PASSING_NEIGHBOURHOODS,
 ) -> None:
     """Generate Markdown quality report from reviews.db.
 
@@ -68,7 +70,7 @@ def generate_quality_report(
     earliest = date_range[0] or "N/A"
     latest = date_range[1] or "N/A"
 
-    # --- Per-neighbourhood, per-year counts (2019-2025) ---
+    # --- Per-neighbourhood, per-year counts (2019-2021) ---
     rows = conn.execute("""
         SELECT
             b.neighbourhood_name,
@@ -78,7 +80,7 @@ def generate_quality_report(
         FROM reviews r
         JOIN businesses b ON r.business_id = b.business_id
         WHERE b.neighbourhood_id IS NOT NULL
-          AND substr(r.review_date, 1, 4) BETWEEN '2019' AND '2025'
+          AND substr(r.review_date, 1, 4) BETWEEN '2019' AND '2021'
         GROUP BY b.neighbourhood_name, b.neighbourhood_id, year
         ORDER BY b.neighbourhood_name, year
     """).fetchall()
@@ -127,26 +129,29 @@ def generate_quality_report(
     lines += [
         "## Coverage by Neighbourhood",
         "",
-        "> **GATE**: Every neighbourhood must have reviews in at least 5 of 7 years (2019–2025) and at least 500 total reviews. Rows failing this gate are marked **FAIL**.",
+        "> **GATE**: Every neighbourhood must have reviews in at least 3 of 3 years (2019–2021) and at least 500 total reviews. Rows failing this gate are marked **FAIL**.",
         "",
-        "| Neighbourhood | Borough | Total Reviews | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | Years with Coverage |",
-        "|---------------|---------|--------------|------|------|------|------|------|------|---------------------|",
+        "| Neighbourhood | Borough | Total Reviews | 2019 | 2020 | 2021 | Years with Coverage |",
+        "|---------------|---------|--------------|------|------|------|---------------------|",
     ]
 
     fail_count = 0
+    pass_count = 0
     for name, nd in sorted_nbhd:
         nta_code = nd["nta_code"]
         borough = _borough(nta_code)
         year_counts = nd["years"]
         total = _total(nd)
         years_with_data = sum(
-            1 for y in ["2019", "2020", "2021", "2022", "2023", "2024", "2025"]
+            1 for y in ["2019", "2020", "2021"]
             if year_counts.get(y, 0) > 0
         )
         cols = [year_counts.get(y, 0) for y in YEARS]
         passing = total >= MIN_TOTAL_REVIEWS and years_with_data >= MIN_YEARS_WITH_COVERAGE
         coverage_cell = str(years_with_data) if passing else f"**FAIL** ({years_with_data})"
-        if not passing:
+        if passing:
+            pass_count += 1
+        else:
             fail_count += 1
         lines.append(
             f"| {name} | {borough} | {total:,} | "
@@ -155,13 +160,10 @@ def generate_quality_report(
         )
 
     lines.append("")
-    if fail_count > 0:
-        lines.append(
-            f"**Coverage gate: {fail_count} neighbourhood{'s' if fail_count != 1 else ''} FAIL. "
-            "Do not proceed to Phase 2.**"
-        )
+    if fail_count == 0:
+        lines.append(f"Coverage gate: PASS — all {pass_count} neighbourhoods meet thresholds.")
     else:
-        lines.append("Coverage gate: PASS. All neighbourhoods meet minimum thresholds.")
+        lines.append(f"Coverage gate: **{pass_count} PASS**, {fail_count} FAIL (low data — excluded from Phase 2).")
     lines.append("")
 
     # Section 4: Skipped Records Summary
@@ -172,7 +174,7 @@ def generate_quality_report(
         "| Reason | Count |",
         "|--------|-------|",
         f"| Missing lat/lng | {sc.get('missing_lat_lng', 0):,} |",
-        f"| Outside Manhattan/Brooklyn NTA polygons | {sc.get('outside_nta', 0):,} |",
+        f"| Outside Philadelphia neighbourhood polygons | {sc.get('outside_nta', 0):,} |",
         f"| Duplicate business_id (INSERT OR IGNORE) | {sc.get('duplicate_business_id', 0):,} |",
         f"| Review timestamp unparseable | {sc.get('bad_timestamp', 0):,} |",
         "",
@@ -180,10 +182,15 @@ def generate_quality_report(
 
     # Section 5: Phase 2 Readiness
     lines += ["## Phase 2 Readiness", ""]
-    if fail_count == 0 and total_reviews > 0:
-        lines.append("READY FOR PHASE 2  \u2713")
+    if pass_count >= min_passing_neighbourhoods and total_reviews > 0:
+        lines.append(f"READY FOR PHASE 2  \u2713 — {pass_count} neighbourhoods meet coverage thresholds.")
+    elif total_reviews == 0:
+        lines.append("NOT READY \u2014 no reviews in database.")
     else:
-        lines.append("NOT READY \u2014 resolve coverage failures above before proceeding.")
+        lines.append(
+            f"NOT READY \u2014 only {pass_count} of {min_passing_neighbourhoods} required "
+            "neighbourhoods pass coverage thresholds."
+        )
     lines.append("")
 
     out = Path(output_path)

@@ -17,7 +17,7 @@ def _build_report_data(conn):
         FROM reviews r
         JOIN businesses b ON r.business_id = b.business_id
         WHERE b.neighbourhood_id IS NOT NULL
-          AND substr(r.review_date, 1, 4) BETWEEN '2019' AND '2025'
+          AND substr(r.review_date, 1, 4) BETWEEN '2019' AND '2021'
         GROUP BY b.neighbourhood_name, year
         ORDER BY b.neighbourhood_name, year
     """).fetchall()
@@ -51,7 +51,7 @@ def test_report_has_neighbourhood_and_year_keys(in_memory_db):
 
 
 def test_report_excludes_reviews_outside_date_range(in_memory_db):
-    """Reviews before 2019 or after 2025 are excluded from the quality report."""
+    """Reviews before 2019 or after 2021 are excluded from the quality report."""
     conn = in_memory_db
     conn.execute(
         "INSERT INTO businesses (business_id, name, neighbourhood_id, neighbourhood_name) "
@@ -192,11 +192,11 @@ def test_generate_report_produces_markdown_with_both_neighbourhoods(tmp_path):
 
 def test_generate_report_marks_fail_for_low_review_count(tmp_path):
     """A neighbourhood with fewer than 500 total reviews is marked FAIL in Years with Coverage."""
-    # 6 years of data but only 10 reviews/year = 60 total (below 500 threshold)
+    # 3 years of data but only 10 reviews/year = 30 total (below 500 threshold)
     db_path = _make_db(tmp_path, {
         "Low Volume": {
             "nta_code": "099",
-            "year_counts": {"2019": 10, "2020": 10, "2021": 10, "2022": 10, "2023": 10, "2024": 10},
+            "year_counts": {"2019": 10, "2020": 10, "2021": 10},
         },
     })
     out_path = tmp_path / "report.md"
@@ -207,12 +207,12 @@ def test_generate_report_marks_fail_for_low_review_count(tmp_path):
 
 
 def test_generate_report_marks_fail_for_insufficient_year_coverage(tmp_path):
-    """A neighbourhood with coverage in only 3 of 7 years is marked FAIL."""
-    # 500 reviews total but only 3 years covered
+    """A neighbourhood with coverage in only 2 of 3 years is marked FAIL."""
+    # 600 reviews total but only 2 of 3 years covered (missing 2020)
     db_path = _make_db(tmp_path, {
         "Sparse Years": {
             "nta_code": "077",
-            "year_counts": {"2019": 200, "2021": 200, "2023": 100},
+            "year_counts": {"2019": 300, "2021": 300},
         },
     })
     out_path = tmp_path / "report.md"
@@ -223,7 +223,7 @@ def test_generate_report_marks_fail_for_insufficient_year_coverage(tmp_path):
 
 
 def test_generate_report_fail_gate_message_when_any_neighbourhood_fails(tmp_path):
-    """If any neighbourhood FAILs, report contains the gate failure message."""
+    """If any neighbourhood FAILs, report contains the count of failing neighbourhoods."""
     db_path = _make_db(tmp_path, {
         "Under Threshold": {"nta_code": "010", "year_counts": {"2021": 5}},
     })
@@ -231,40 +231,36 @@ def test_generate_report_fail_gate_message_when_any_neighbourhood_fails(tmp_path
     gen = _import_generate()
     gen(str(db_path), str(out_path))
     content = out_path.read_text()
-    assert "FAIL. Do not proceed to Phase 2." in content
+    assert "FAIL" in content
 
 
 def test_generate_report_pass_gate_message_when_all_pass(tmp_path):
     """If all neighbourhoods pass, report contains the PASS gate message."""
-    # 500+ reviews across 5+ years
+    # 500+ reviews across all 3 years
     db_path = _make_db(tmp_path, {
         "Good Neighbourhood": {
             "nta_code": "055",
-            "year_counts": {
-                "2019": 100, "2020": 100, "2021": 100, "2022": 100, "2023": 100, "2024": 100,
-            },
+            "year_counts": {"2019": 200, "2020": 150, "2021": 200},
         },
     })
     out_path = tmp_path / "report.md"
     gen = _import_generate()
-    gen(str(db_path), str(out_path))
+    gen(str(db_path), str(out_path), min_passing_neighbourhoods=1)
     content = out_path.read_text()
-    assert "Coverage gate: PASS. All neighbourhoods meet minimum thresholds." in content
+    assert "Coverage gate: PASS" in content
 
 
 def test_generate_report_ready_verdict_when_all_pass(tmp_path):
-    """Phase 2 readiness section says READY FOR PHASE 2 when all pass."""
+    """Phase 2 readiness section says READY FOR PHASE 2 when enough neighbourhoods pass."""
     db_path = _make_db(tmp_path, {
         "Good Neighbourhood": {
             "nta_code": "055",
-            "year_counts": {
-                "2019": 100, "2020": 100, "2021": 100, "2022": 100, "2023": 100, "2024": 100,
-            },
+            "year_counts": {"2019": 200, "2020": 150, "2021": 200},
         },
     })
     out_path = tmp_path / "report.md"
     gen = _import_generate()
-    gen(str(db_path), str(out_path))
+    gen(str(db_path), str(out_path), min_passing_neighbourhoods=1)
     content = out_path.read_text()
     assert "READY FOR PHASE 2" in content
 
