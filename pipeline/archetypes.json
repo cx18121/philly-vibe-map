@@ -1,0 +1,8 @@
+{
+  "artsy": ["art gallery", "creative space", "street art", "indie music", "bohemian", "artist studio", "mural", "craft workshop"],
+  "foodie": ["amazing food", "best restaurant", "culinary experience", "farm to table", "food scene", "brunch spot", "chef", "tasting menu"],
+  "nightlife": ["great bar", "nightclub", "live music venue", "cocktail bar", "late night", "DJ", "happy hour", "pub crawl"],
+  "family": ["kid friendly", "family restaurant", "playground nearby", "safe neighborhood", "family owned", "children welcome", "stroller friendly"],
+  "upscale": ["fine dining", "luxury", "upscale boutique", "high end", "exclusive", "elegant", "premium", "sophisticated"],
+  "cultural": ["museum", "historic landmark", "cultural center", "heritage", "diversity", "ethnic cuisine", "tradition", "community festival"]
+}
