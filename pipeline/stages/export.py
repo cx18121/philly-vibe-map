@@ -1,6 +1,7 @@
 """Stage 6: Export — FAISS index, representative quotes, enriched GeoJSON."""
 from __future__ import annotations
 
+import collections
 import datetime
 import glob
 import json
@@ -39,6 +40,8 @@ EXPECTED_ARTIFACTS = [
     "representative_quotes.json",
     "sentiment_model",
     "enriched_geojson.geojson",
+    "neighbourhood_topics.json",
+    "review_counts.json",
 ]
 
 
@@ -233,6 +236,111 @@ def _build_enriched_geojson(
 
 
 # ---------------------------------------------------------------------------
+# Sub-stage D: Neighbourhood Topics (API-02)
+# ---------------------------------------------------------------------------
+
+def _build_neighbourhood_topics(db_path: str, artifacts_dir: Path) -> dict:
+    """Build per-neighbourhood topic distributions from topic assignments.
+
+    Returns:
+        {neighbourhood_id: [{label, keywords, review_share}, ...]}
+    """
+    from bertopic import BERTopic
+
+    # Load topic assignments: {review_rowid_str: topic_id}
+    with open(artifacts_dir / "topic_assignments.json") as f:
+        topic_assignments = json.load(f)
+
+    # Load BERTopic model for topic representations
+    topic_model = BERTopic.load(str(artifacts_dir / "bertopic_model"))
+
+    # Build review-to-neighbourhood mapping from DB
+    conn = sqlite3.connect(db_path)
+    review_to_nid: dict[str, str] = {}
+    for row in conn.execute(
+        """
+        SELECT r.rowid, b.neighbourhood_id
+        FROM reviews r
+        JOIN businesses b ON r.business_id = b.business_id
+        WHERE b.neighbourhood_id IS NOT NULL
+        """
+    ):
+        review_to_nid[str(row[0])] = row[1]
+    conn.close()
+
+    # Count topic occurrences per neighbourhood
+    nid_topic_counts: dict[str, collections.Counter] = {}
+    nid_total_reviews: dict[str, int] = collections.defaultdict(int)
+
+    for rowid_str, topic_id in topic_assignments.items():
+        if topic_id == -1:  # skip outlier topics
+            continue
+        nid = review_to_nid.get(rowid_str)
+        if nid is None:
+            continue
+        if nid not in nid_topic_counts:
+            nid_topic_counts[nid] = collections.Counter()
+        nid_topic_counts[nid][topic_id] += 1
+        nid_total_reviews[nid] += 1
+
+    # Build result: top 10 topics per neighbourhood with labels and keywords
+    result: dict[str, list[dict]] = {}
+    for nid, counter in sorted(nid_topic_counts.items()):
+        top_topics = counter.most_common(10)
+        total = nid_total_reviews[nid]
+        entries = []
+        for topic_id, count in top_topics:
+            rep = topic_model.get_topic(topic_id)
+            if not rep or rep is False:
+                continue
+            label = " ".join([w for w, _ in rep[:3]])
+            keywords = [w for w, _ in rep[:5]]
+            entries.append({
+                "label": label,
+                "keywords": keywords,
+                "review_share": round(count / total, 4),
+            })
+        result[nid] = entries
+
+    with open(artifacts_dir / "neighbourhood_topics.json", "w") as f:
+        json.dump(result, f, indent=2)
+
+    _log("INFO", f"Neighbourhood topics saved: {len(result)} neighbourhoods")
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Sub-stage E: Review Counts (API-02)
+# ---------------------------------------------------------------------------
+
+def _build_review_counts(db_path: str, artifacts_dir: Path) -> dict:
+    """Build per-neighbourhood review counts.
+
+    Returns:
+        {neighbourhood_id: count}
+    """
+    conn = sqlite3.connect(db_path)
+    counts: dict[str, int] = {}
+    for row in conn.execute(
+        """
+        SELECT b.neighbourhood_id, COUNT(*)
+        FROM reviews r
+        JOIN businesses b ON r.business_id = b.business_id
+        WHERE b.neighbourhood_id IS NOT NULL
+        GROUP BY b.neighbourhood_id
+        """
+    ):
+        counts[row[0]] = row[1]
+    conn.close()
+
+    with open(artifacts_dir / "review_counts.json", "w") as f:
+        json.dump(counts, f, indent=2)
+
+    _log("INFO", f"Review counts saved: {len(counts)} neighbourhoods")
+    return counts
+
+
+# ---------------------------------------------------------------------------
 # Main stage entry point
 # ---------------------------------------------------------------------------
 
@@ -271,12 +379,18 @@ def run_export(
     # Sub-stage C: Enriched GeoJSON (NLP-09 partial)
     _build_enriched_geojson(vibe_scores, artifacts_dir, geojson_path)
 
+    # Sub-stage D: Neighbourhood Topics (API-02)
+    topics = _build_neighbourhood_topics(db_path, artifacts_dir)
+
+    # Sub-stage E: Review Counts (API-02)
+    counts = _build_review_counts(db_path, artifacts_dir)
+
     # Final artifact validation (NLP-09)
     missing = [a for a in EXPECTED_ARTIFACTS if not (artifacts_dir / a).exists()]
     if missing:
         _log("WARN", f"Missing artifacts: {missing}")
     else:
-        _log("INFO", "All 11 artifacts present -- pipeline complete")
+        _log("INFO", f"All {len(EXPECTED_ARTIFACTS)} artifacts present -- pipeline complete")
 
     _log("INFO", "Stage 'export': complete")
 
@@ -284,5 +398,7 @@ def run_export(
         "skipped": False,
         "faiss_ntotal": index.ntotal,
         "quote_neighbourhoods": len(quotes),
+        "topic_neighbourhoods": len(topics),
+        "review_count_neighbourhoods": len(counts),
         "missing_artifacts": missing,
     }
