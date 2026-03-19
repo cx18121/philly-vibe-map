@@ -265,7 +265,7 @@ def archetypes_path():
 # ---------------------------------------------------------------------------
 
 @pytest.fixture
-def mock_export_setup(tmp_path):
+def mock_export_setup(tmp_path, monkeypatch):
     """Create a complete mock environment for the export stage.
 
     Returns (db_path, artifacts_dir, boundaries_geojson_path) with:
@@ -384,9 +384,18 @@ def mock_export_setup(tmp_path):
     with open(artifacts_dir / "temporal_series.json", "w") as f:
         json.dump(temporal_series, f, indent=2)
 
-    # bertopic_model/ directory (stub)
+    # bertopic_model/ directory (stub) — mock BERTopic.load so tests don't
+    # need real model weights; get_topic() returns plausible (word, score) pairs.
     (artifacts_dir / "bertopic_model").mkdir()
     (artifacts_dir / "bertopic_model" / "config.json").write_text("{}")
+    from unittest.mock import MagicMock
+    import bertopic as _bertopic_module
+
+    _mock_topic_model = MagicMock()
+    _mock_topic_model.get_topic.side_effect = lambda tid: [
+        (f"word{tid}_{i}", round(0.5 / (i + 1), 4)) for i in range(5)
+    ]
+    monkeypatch.setattr(_bertopic_module.BERTopic, "load", classmethod(lambda cls, path, **kw: _mock_topic_model))
 
     # sentiment_model/ directory (stub)
     (artifacts_dir / "sentiment_model").mkdir()
