@@ -13,7 +13,7 @@ This project delivers an interactive map of Philadelphia neighbourhood vibes der
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Data Foundation** - Collect 50k+ reviews, fetch NYC boundary GeoJSON, validate temporal coverage (completed 2026-03-16)
-- [ ] **Phase 2: NLP Pipeline** - Embed reviews, discover topics, score vibes, build FAISS index, export all artifacts
+- [x] **Phase 2: NLP Pipeline** - Embed reviews, discover topics, score vibes, build FAISS index, export all artifacts (completed 2026-03-19)
 - [ ] **Phase 3: Backend API** - Serve pre-computed artifacts through 4 FastAPI endpoints with sub-100ms responses
 - [ ] **Phase 4: Core Map** - Render interactive choropleth with hover, click-to-detail sidebar, legend, and responsive layout
 - [ ] **Phase 5: Temporal Animation and Polish** - Add time slider with year-by-year animation, glow effects, and sidebar transitions
@@ -38,7 +38,7 @@ Plans:
 - [x] 01-02-PLAN.md — Philadelphia neighbourhood boundary download (OpenDataPhilly) + neighbourhood name curation mapping (COMPLETE: 159 neighbourhoods, EPSG:4326, NEIGHBORHOOD_NUMBER/NEIGHBORHOOD_NAME schema)
 - [x] 01-03-PLAN.md — SQLite schema + business ingestion with city=Philadelphia filter (COMPLETE: businesses table populated with ~14,568 Philadelphia businesses)
 - [x] 01-04-PLAN.md — Review streaming ingest (NDJSON → reviews table) (COMPLETE: ingest_reviews() with FK filter, INSERT OR IGNORE, WAL mode, ingest_stats.json sidecar)
-- [ ] 01-05-PLAN.md — Quality report generation + Phase 2 readiness human verification
+- [x] 01-05-PLAN.md — Quality report generation + Phase 2 readiness human verification
 
 ### Phase 2: NLP Pipeline
 **Goal**: All ML computation complete -- embeddings, topics, vibe scores, sentiment, temporal drift, FAISS index, and representative quotes exported as serialized artifacts
@@ -53,11 +53,11 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Pipeline structure, archetype config, orchestrator skeleton, and Wave 0 test scaffolds
-- [ ] 02-02-PLAN.md — Sentence-transformer embedding (NLP-01) and BERTopic topic modeling (NLP-02)
-- [ ] 02-03-PLAN.md — LoRA fine-tuned DistilBERT sentiment classifier (NLP-04)
-- [ ] 02-04-PLAN.md — Vibe archetype scoring with recency weighting (NLP-03, NLP-05) and temporal drift (NLP-06)
-- [ ] 02-05-PLAN.md — FAISS index, representative quotes, enriched GeoJSON export, and pipeline quality verification (NLP-07, NLP-08, NLP-09)
+- [x] 02-01-PLAN.md — Pipeline structure, archetype config, orchestrator skeleton, and Wave 0 test scaffolds
+- [x] 02-02-PLAN.md — Sentence-transformer embedding (NLP-01) and BERTopic topic modeling (NLP-02)
+- [x] 02-03-PLAN.md — LoRA fine-tuned DistilBERT sentiment classifier (NLP-04)
+- [x] 02-04-PLAN.md — Vibe archetype scoring with recency weighting (NLP-03, NLP-05) and temporal drift (NLP-06)
+- [x] 02-05-PLAN.md — FAISS index, representative quotes, enriched GeoJSON export, and pipeline quality verification (NLP-07, NLP-08, NLP-09)
 
 ### Phase 3: Backend API
 **Goal**: A lightweight FastAPI server that loads pre-computed artifacts at startup and serves neighbourhood data, temporal series, and similarity queries with zero ML inference
@@ -128,7 +128,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Data Foundation (Philadelphia) | 5/5 | Complete   | 2026-03-16 |
-| 2. NLP Pipeline | 3/5 | In Progress|  |
+| 2. NLP Pipeline | 5/5 | Complete   | 2026-03-19 |
 | 3. Backend API | 0/? | Not started | - |
 | 4. Core Map | 0/? | Not started | - |
 | 5. Temporal Animation and Polish | 0/? | Not started | - |

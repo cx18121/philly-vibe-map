@@ -22,8 +22,8 @@
 - [x] **NLP-04**: System domain-adapts a sentiment classifier using LoRA fine-tuning on DistilBERT with the Yelp Open Dataset (star ratings as labels), merging adapter weights before export
 - [x] **NLP-05**: System computes recency-weighted vibe scores using exponential decay on review timestamps (half-life configurable; computation in log-space with minimum weight clamp of 1e-6)
 - [x] **NLP-06**: System buckets reviews by year (2019–2025), runs the full vibe scoring pipeline per bucket (equal weights within each bucket, no decay), and produces a temporal drift time series per neighbourhood
-- [ ] **NLP-07**: System builds a FAISS flat index over neighbourhood vibe vectors to support nearest-neighbour similarity queries
-- [ ] **NLP-08**: System selects 3–5 representative review quotes per neighbourhood per vibe archetype (highest cosine similarity to archetype centroid)
+- [x] **NLP-07**: System builds a FAISS flat index over neighbourhood vibe vectors to support nearest-neighbour similarity queries
+- [x] **NLP-08**: System selects 3–5 representative review quotes per neighbourhood per vibe archetype (highest cosine similarity to archetype centroid)
 - [x] **NLP-09**: Pipeline exports all artifacts (embeddings, vibe scores, temporal series, FAISS index, representative quotes, enriched GeoJSON) as serialized files ready for backend consumption
 
 ### Backend API
@@ -113,8 +113,8 @@
 | NLP-04 | Phase 2 | Complete |
 | NLP-05 | Phase 2 | Complete |
 | NLP-06 | Phase 2 | Complete |
-| NLP-07 | Phase 2 | Pending |
-| NLP-08 | Phase 2 | Pending |
+| NLP-07 | Phase 2 | Complete |
+| NLP-08 | Phase 2 | Complete |
 | NLP-09 | Phase 2 | Complete |
 | API-01 | Phase 3 | Pending |
 | API-02 | Phase 3 | Pending |

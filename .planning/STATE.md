@@ -2,16 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 02-04-PLAN.md
-last_updated: "2026-03-17T18:23:00Z"
-last_activity: 2026-03-17 -- Plan 02-04 complete, vibe scoring and temporal drift stages implemented
+status: unknown
+stopped_at: Completed 02-05-PLAN.md (Phase 02 complete)
+last_updated: "2026-03-19T16:07:04.910Z"
 progress:
   total_phases: 6
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 10
-  completed_plans: 9
-  percent: 90
+  completed_plans: 10
 ---
 
 # Project State
@@ -21,20 +19,17 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-16)
 
 **Core value:** An interactive map where anyone can feel the character of a New York City neighbourhood through its reviews -- and watch how that character has shifted year by year from 2019 to 2025.
-**Current focus:** Phase 2: NLP Pipeline
+**Current focus:** Phase 03 — backend-api
 
 ## Current Position
 
-Phase: 2 of 6 (NLP Pipeline)
-Plan: 4 of 5 complete in current phase (02-04 done)
-Status: In progress
-Last activity: 2026-03-17 -- Plan 02-04 complete, vibe scoring and temporal drift stages implemented
-
-Progress: [█████████░] 90% (9/10 plans across all phases)
+Phase: 03 (backend-api) — PENDING
+Plan: 1 of 2
 
 ## Performance Metrics
 
 **Velocity:**
+
 - Total plans completed: 0
 - Average duration: -
 - Total execution time: 0 hours
@@ -46,6 +41,7 @@ Progress: [█████████░] 90% (9/10 plans across all phases)
 | - | - | - | - |
 
 **Recent Trend:**
+
 - Last 5 plans: -
 - Trend: -
 
@@ -59,6 +55,7 @@ Progress: [█████████░] 90% (9/10 plans across all phases)
 | Phase 02-nlp-pipeline P02 | 9min | 2 tasks | 4 files |
 | Phase 02-nlp-pipeline P03 | 6min | 1 tasks | 2 files |
 | Phase 02-nlp-pipeline P04 | 9min | 2 tasks | 4 files |
+| Phase 02-nlp-pipeline P05 | 12min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -84,6 +81,8 @@ Recent decisions affecting current work:
 - [Phase 02-nlp-pipeline]: WeightedTrainer with CrossEntropyLoss for class-balanced sentiment training; CPU fallback auto-limits to 500K samples
 - [Phase 02-nlp-pipeline 02-04]: Recency weighting uses log-space exponential decay (log_weight = -lambda * delta_days) with 1e-6 min clamp; temporal year buckets use equal weight per review
 - [Phase 02-nlp-pipeline 02-04]: Exported reusable helpers (compute_recency_weight, compute_topic_centroids, score_neighbourhood_vibes) for cross-stage sharing
+- [Phase 02-nlp-pipeline 02-05]: FAISS IndexFlatIP with L2 normalization for cosine similarity over 6D vibe vectors; quote selection via cosine similarity between review embeddings and archetype centroids
+- [Phase 02-nlp-pipeline 02-05]: GeoJSON enrichment keyed on NEIGHBORHOOD_NUMBER; 11-artifact validation gate as final pipeline step
 
 ### Pending Todos
 
@@ -96,6 +95,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T18:23:00Z
-Stopped at: Completed 02-04-PLAN.md
+Last session: 2026-03-19T16:07:03.748Z
+Stopped at: Completed 02-05-PLAN.md (Phase 02 complete)
 Resume file: None
