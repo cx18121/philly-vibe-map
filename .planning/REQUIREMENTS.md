@@ -28,12 +28,12 @@
 
 ### Backend API
 
-- [ ] **API-01**: `GET /neighbourhoods` returns enriched GeoJSON FeatureCollection with vibe scores, dominant vibe, and sentiment scores embedded in feature properties
-- [ ] **API-02**: `GET /neighbourhoods/{id}` returns per-neighbourhood detail: topic breakdown, vibe archetype scores, representative quotes, review count, data coverage by year
-- [ ] **API-03**: `GET /temporal` returns the full temporal drift dataset (all neighbourhoods × all years × vibe vectors) as a single JSON payload for client-side time-slider scrubbing
-- [ ] **API-04**: `GET /similar?id={neighbourhood_id}&k={n}` returns the k nearest-neighbour neighbourhoods via FAISS query
+- [x] **API-01**: `GET /neighbourhoods` returns enriched GeoJSON FeatureCollection with vibe scores, dominant vibe, and sentiment scores embedded in feature properties
+- [x] **API-02**: `GET /neighbourhoods/{id}` returns per-neighbourhood detail: topic breakdown, vibe archetype scores, representative quotes, review count, data coverage by year
+- [x] **API-03**: `GET /temporal` returns the full temporal drift dataset (all neighbourhoods × all years × vibe vectors) as a single JSON payload for client-side time-slider scrubbing
+- [x] **API-04**: `GET /similar?id={neighbourhood_id}&k={n}` returns the k nearest-neighbour neighbourhoods via FAISS query
 - [x] **API-05**: Backend loads all artifacts (JSON + FAISS index) into memory at startup via FastAPI lifespan event — zero ML model loading in the serving layer
-- [ ] **API-06**: All endpoints return responses in under 100ms (FAISS query included)
+- [x] **API-06**: All endpoints return responses in under 100ms (FAISS query included)
 
 ### Frontend — Core Map
 
@@ -116,12 +116,12 @@
 | NLP-07 | Phase 2 | Complete |
 | NLP-08 | Phase 2 | Complete |
 | NLP-09 | Phase 2 | Complete |
-| API-01 | Phase 3 | Pending |
-| API-02 | Phase 3 | Pending |
-| API-03 | Phase 3 | Pending |
-| API-04 | Phase 3 | Pending |
+| API-01 | Phase 3 | Complete |
+| API-02 | Phase 3 | Complete |
+| API-03 | Phase 3 | Complete |
+| API-04 | Phase 3 | Complete |
 | API-05 | Phase 3 | Complete |
-| API-06 | Phase 3 | Pending |
+| API-06 | Phase 3 | Complete |
 | MAP-01 | Phase 4 | Pending |
 | MAP-02 | Phase 4 | Pending |
 | MAP-03 | Phase 4 | Pending |

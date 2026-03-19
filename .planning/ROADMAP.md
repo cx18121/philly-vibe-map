@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Data Foundation** - Collect 50k+ reviews, fetch NYC boundary GeoJSON, validate temporal coverage (completed 2026-03-16)
 - [x] **Phase 2: NLP Pipeline** - Embed reviews, discover topics, score vibes, build FAISS index, export all artifacts (completed 2026-03-19)
-- [ ] **Phase 3: Backend API** - Serve pre-computed artifacts through 4 FastAPI endpoints with sub-100ms responses
+- [x] **Phase 3: Backend API** - Serve pre-computed artifacts through 4 FastAPI endpoints with sub-100ms responses (completed 2026-03-19)
 - [ ] **Phase 4: Core Map** - Render interactive choropleth with hover, click-to-detail sidebar, legend, and responsive layout
 - [ ] **Phase 5: Temporal Animation and Polish** - Add time slider with year-by-year animation, glow effects, and sidebar transitions
 - [ ] **Phase 6: Deployment and Sharing** - Deploy to public URLs with shareable deep links
@@ -129,7 +129,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 |-------|----------------|--------|-----------|
 | 1. Data Foundation (Philadelphia) | 5/5 | Complete   | 2026-03-16 |
 | 2. NLP Pipeline | 5/5 | Complete   | 2026-03-19 |
-| 3. Backend API | 1/2 | In Progress|  |
+| 3. Backend API | 2/2 | Complete   | 2026-03-19 |
 | 4. Core Map | 0/? | Not started | - |
 | 5. Temporal Animation and Polish | 0/? | Not started | - |
 | 6. Deployment and Sharing | 0/? | Not started | - |
