@@ -69,11 +69,11 @@ Plans:
   3. `GET /temporal` returns a JSON payload containing vibe vectors for all 30 neighbourhoods across all 7 years, suitable for client-side time-slider scrubbing
   4. `GET /similar?id={id}&k=5` returns 5 nearest-neighbour neighbourhoods via FAISS, and all 4 endpoints respond in under 100ms measured by automated test
   5. Server starts up and begins serving within 10 seconds, loading all artifacts via FastAPI lifespan event with no ML model dependencies
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
+- [ ] 03-01-PLAN.md — Export extension (neighbourhood_topics.json, review_counts.json) + backend module skeleton (config, loader, schemas, lifespan app)
+- [ ] 03-02-PLAN.md — All 4 data endpoints, integration tests, Dockerfile, and sub-100ms response verification
 
 ### Phase 4: Core Map
 **Goal**: A functional interactive choropleth map where users can explore neighbourhood vibes through hover, click, and visual cues
@@ -129,7 +129,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 |-------|----------------|--------|-----------|
 | 1. Data Foundation (Philadelphia) | 5/5 | Complete   | 2026-03-16 |
 | 2. NLP Pipeline | 5/5 | Complete   | 2026-03-19 |
-| 3. Backend API | 0/? | Not started | - |
+| 3. Backend API | 0/2 | Not started | - |
 | 4. Core Map | 0/? | Not started | - |
 | 5. Temporal Animation and Polish | 0/? | Not started | - |
 | 6. Deployment and Sharing | 0/? | Not started | - |
