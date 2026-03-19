@@ -129,7 +129,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 |-------|----------------|--------|-----------|
 | 1. Data Foundation (Philadelphia) | 5/5 | Complete   | 2026-03-16 |
 | 2. NLP Pipeline | 5/5 | Complete   | 2026-03-19 |
-| 3. Backend API | 0/2 | Not started | - |
+| 3. Backend API | 1/2 | In Progress|  |
 | 4. Core Map | 0/? | Not started | - |
 | 5. Temporal Animation and Polish | 0/? | Not started | - |
 | 6. Deployment and Sharing | 0/? | Not started | - |
