@@ -72,8 +72,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Export extension (neighbourhood_topics.json, review_counts.json) + backend module skeleton (config, loader, schemas, lifespan app)
-- [ ] 03-02-PLAN.md — All 4 data endpoints, integration tests, Dockerfile, and sub-100ms response verification
+- [x] 03-01-PLAN.md — Export extension (neighbourhood_topics.json, review_counts.json) + backend module skeleton (config, loader, schemas, lifespan app)
+- [x] 03-02-PLAN.md — All 4 data endpoints, integration tests, Dockerfile, and sub-100ms response verification
 
 ### Phase 4: Core Map
 **Goal**: A functional interactive choropleth map where users can explore neighbourhood vibes through hover, click, and visual cues
@@ -85,12 +85,12 @@ Plans:
   3. A legend is visible explaining all 6 vibe archetype colours, and the colour palette passes colourblind accessibility simulation
   4. On mobile viewports (under 768px), the sidebar renders as a bottom sheet instead of a side panel
   5. A user can tab through neighbourhoods with keyboard, press enter to select, and press escape to dismiss the sidebar
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
-- [ ] 04-03: TBD
+- [ ] 04-01-PLAN.md — Vite project scaffold, dependencies, TypeScript/Vitest config, foundational modules (types, colours, store, API hooks, skeleton)
+- [ ] 04-02-PLAN.md — MapLibre choropleth with fill/outline layers, hover tooltip, click handler, and colour legend
+- [ ] 04-03-PLAN.md — Detail sidebar/bottom-sheet with vibe bars, topics, sentiment pills, quotes, keyboard navigation, and human verification
 
 ### Phase 5: Temporal Animation and Polish
 **Goal**: The map comes alive with year-by-year vibe transitions and visual effects that make this a portfolio-stopping piece of interactive data art
@@ -130,6 +130,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 1. Data Foundation (Philadelphia) | 5/5 | Complete   | 2026-03-16 |
 | 2. NLP Pipeline | 5/5 | Complete   | 2026-03-19 |
 | 3. Backend API | 2/2 | Complete   | 2026-03-19 |
-| 4. Core Map | 0/? | Not started | - |
+| 4. Core Map | 0/3 | Not started | - |
 | 5. Temporal Animation and Polish | 0/? | Not started | - |
 | 6. Deployment and Sharing | 0/? | Not started | - |
