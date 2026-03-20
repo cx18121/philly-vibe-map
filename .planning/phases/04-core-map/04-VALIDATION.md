@@ -38,14 +38,16 @@ created: 2026-03-20
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 4-W0-01 | W0 | 0 | MAP-02 | unit | `cd frontend && npx vitest run src/__tests__/colors.test.ts -t "all archetypes have distinct colours"` | ❌ W0 | ⬜ pending |
-| 4-W0-02 | W0 | 0 | MAP-05 | unit | `cd frontend && npx vitest run src/__tests__/Legend.test.tsx -t "renders all archetypes"` | ❌ W0 | ⬜ pending |
-| 4-W0-03 | W0 | 0 | MAP-06 | unit | `cd frontend && npx vitest run src/__tests__/MapSkeleton.test.tsx -t "renders skeleton"` | ❌ W0 | ⬜ pending |
-| 4-W0-04 | W0 | 0 | MAP-07 | unit | `cd frontend && npx vitest run src/__tests__/DetailContainer.test.tsx -t "renders bottom sheet"` | ❌ W0 | ⬜ pending |
-| 4-W0-05 | W0 | 0 | MAP-01,MAP-03,MAP-08,MAP-09 | integration | `cd frontend && npx vitest run src/__tests__/VibeMap.test.tsx` | ❌ W0 | ⬜ pending |
-| 4-W0-06 | W0 | 0 | MAP-04 | integration | `cd frontend && npx vitest run src/__tests__/Sidebar.test.tsx -t "renders detail on selection"` | ❌ W0 | ⬜ pending |
+| 4-W0-01 | W0 | 0 | MAP-02 | unit | `cd frontend && npx vitest run src/__tests__/colors.test.ts -t "all archetypes have distinct colours"` | No W0 | pending |
+| 4-W0-02 | W0 | 0 | MAP-05 | unit | `cd frontend && npx vitest run src/__tests__/Legend.test.tsx -t "renders all archetypes"` | No W0 | pending |
+| 4-W0-03 | W0 | 0 | MAP-06 | unit | `cd frontend && npx vitest run src/__tests__/MapSkeleton.test.tsx -t "renders skeleton"` | No W0 | pending |
+| 4-W0-04 | W0 | 0 | MAP-07 | unit | `cd frontend && npx vitest run src/__tests__/DetailContainer.test.tsx -t "renders bottom sheet"` | No W0 | pending |
+| 4-W0-05a | W0 | 0 | MAP-01,MAP-08 | integration | `cd frontend && npx vitest run src/__tests__/VibeMap.test.tsx -t "renders fill and outline layers"` | No W0 | pending |
+| 4-W0-05b | W0 | 0 | MAP-03 | integration | `cd frontend && npx vitest run src/__tests__/VibeMap.test.tsx -t "MAP-03: Hover tooltip"` | No W0 | pending |
+| 4-W0-05c | W0 | 0 | MAP-09 | integration | `cd frontend && npx vitest run src/__tests__/VibeMap.test.tsx -t "MAP-09: Keyboard navigation"` | No W0 | pending |
+| 4-W0-06 | W0 | 0 | MAP-04 | integration | `cd frontend && npx vitest run src/__tests__/Sidebar.test.tsx -t "renders detail on selection"` | No W0 | pending |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+*Status: pending / green / red / flaky*
 
 ---
 
@@ -62,12 +64,23 @@ created: 2026-03-20
 
 ---
 
+## MAP-03 and MAP-09 Automated Test Strategy
+
+**MAP-03 (Hover tooltip):** Tested in `VibeMap.test.tsx` describe block "MAP-03: Hover tooltip". The mock Map component forwards `onMouseMove` as a prop. Tests invoke it directly with a mock event object containing `event.features[0].properties` and `event.point`, then assert tooltip appears with correct name/vibe text and `setHovered` is called. Mouse leave test asserts tooltip disappears.
+
+**MAP-09 (Keyboard navigation):** Tested in `VibeMap.test.tsx` describe block "MAP-09: Keyboard navigation". Since VibeMap adds `window.addEventListener('keydown', ...)`, tests use `fireEvent.keyDown(window, { key: 'Escape' })` etc. Tests assert:
+- Escape calls `clearSelection`
+- Tab calls `setHovered` with the first neighbourhood ID
+- Enter after Tab calls `setSelected` with the focused neighbourhood ID
+
+---
+
 ## Manual-Only Verifications
 
 | Behavior | Requirement | Why Manual | Test Instructions |
 |----------|-------------|------------|-------------------|
 | Colourblind simulation passes | MAP-02 | Visual palette check | Open app, run through Colour Oracle or browser DevTools color blindness emulation; verify all 6 archetypes are distinguishable |
-| Tooltip positioning correct | MAP-03 | Visual/spatial | Hover neighbourhoods across edge cases (top-right, bottom-left) and confirm tooltip doesn't clip off screen |
+| Tooltip positioning correct | MAP-03 | Visual/spatial edge cases | Hover neighbourhoods at screen edges (top-right, bottom-left) and confirm tooltip doesn't clip off screen |
 | Sidebar animation feels smooth | MAP-04 | Subjective UX | Click several neighbourhoods; confirm slide-in/out doesn't jank or flash |
 | Bottom sheet gesture on real mobile | MAP-07 | Touch events not fully simulatable | Load on physical device or Chrome DevTools touch emulation; drag bottom sheet |
 
