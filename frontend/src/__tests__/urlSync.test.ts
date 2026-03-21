@@ -16,13 +16,10 @@ describe('urlSync', () => {
 
     // Mock history.replaceState
     replaceStateSpy = vi.fn();
-    vi.stubGlobal('history', { ...window.history, replaceState: replaceStateSpy });
+    vi.spyOn(window.history, 'replaceState').mockImplementation(replaceStateSpy);
 
-    // Reset URL
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: { ...window.location, pathname: '/', search: '' },
-    });
+    // Navigate to clean URL (jsdom supports this)
+    window.history.pushState = vi.fn();
   });
 
   afterEach(() => {
@@ -72,10 +69,9 @@ describe('urlSync', () => {
 
   describe('hydrateFromUrl', () => {
     it('reads nid and year from URL and sets store', () => {
-      Object.defineProperty(window, 'location', {
-        writable: true,
-        value: { ...window.location, pathname: '/', search: '?nid=042&year=2022' },
-      });
+      // Use jsdom's native navigation to set search params
+      window.history.replaceState.mockRestore?.();
+      window.history.replaceState({}, '', '?nid=042&year=2022');
       hydrateFromUrl();
       const state = useMapStore.getState();
       expect(state.selectedId).toBe('042');
@@ -83,10 +79,8 @@ describe('urlSync', () => {
     });
 
     it('does nothing when URL has no params', () => {
-      Object.defineProperty(window, 'location', {
-        writable: true,
-        value: { ...window.location, pathname: '/', search: '' },
-      });
+      window.history.replaceState.mockRestore?.();
+      window.history.replaceState({}, '', '/');
       hydrateFromUrl();
       const state = useMapStore.getState();
       expect(state.selectedId).toBeNull();
@@ -94,10 +88,8 @@ describe('urlSync', () => {
     });
 
     it('handles partial params - only nid', () => {
-      Object.defineProperty(window, 'location', {
-        writable: true,
-        value: { ...window.location, pathname: '/', search: '?nid=042' },
-      });
+      window.history.replaceState.mockRestore?.();
+      window.history.replaceState({}, '', '?nid=042');
       hydrateFromUrl();
       const state = useMapStore.getState();
       expect(state.selectedId).toBe('042');
@@ -105,10 +97,8 @@ describe('urlSync', () => {
     });
 
     it('handles partial params - only year', () => {
-      Object.defineProperty(window, 'location', {
-        writable: true,
-        value: { ...window.location, pathname: '/', search: '?year=2020' },
-      });
+      window.history.replaceState.mockRestore?.();
+      window.history.replaceState({}, '', '?year=2020');
       hydrateFromUrl();
       const state = useMapStore.getState();
       expect(state.selectedId).toBeNull();
