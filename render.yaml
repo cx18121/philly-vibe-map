@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: vibe-mapper-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: ARTIFACTS_DIR
+        value: data/output/artifacts
