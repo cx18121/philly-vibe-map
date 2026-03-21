@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 04-03-PLAN.md
-last_updated: "2026-03-21T07:33:29.658Z"
+stopped_at: Completed 05-01-PLAN.md
+last_updated: "2026-03-21T18:53:46.219Z"
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 15
-  completed_plans: 15
+  total_plans: 17
+  completed_plans: 16
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-16)
 
 **Core value:** An interactive map where anyone can feel the character of a New York City neighbourhood through its reviews -- and watch how that character has shifted year by year from 2019 to 2025.
-**Current focus:** Phase 04 — core-map
+**Current focus:** Phase 05 — temporal-animation-and-polish
 
 ## Current Position
 
-Phase: 5
-Plan: Not started
+Phase: 05 (temporal-animation-and-polish) — EXECUTING
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -61,6 +61,7 @@ Plan: Not started
 | Phase 04-core-map P01 | 9min | 3 tasks | 17 files |
 | Phase 04-core-map P02 | 10min | 2 tasks | 6 files |
 | Phase 04-core-map P03 | 5min | 3 tasks | 10 files |
+| Phase 05-temporal-animation-and-polish P01 | 28min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,8 @@ Recent decisions affecting current work:
 - [Phase 04-core-map]: Wong-adapted colourblind-safe palette for 6 vibe archetypes; API_BASE defaults to empty string for Vite dev proxy routing
 - [Phase 04-core-map]: FillLayerSpecification/LineLayerSpecification from maplibre-gl for layer typing; captured-handler mock pattern for react-map-gl test invocation
 - [Phase 04-core-map]: DetailPanel reads from Zustand store directly; Sidebar/BottomSheet are pure layout containers rendering DetailPanel as child
+- [Phase 05]: vmForks pool for vitest on WSL2 -- threads and forks both timeout, vmForks works reliably
+- [Phase 05]: Reduced motion detection uses typeof guard for matchMedia -- jsdom compatibility
 
 ### Pending Todos
 
@@ -106,6 +109,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-21T07:19:06.883Z
-Stopped at: Completed 04-03-PLAN.md
+Last session: 2026-03-21T18:53:46.185Z
+Stopped at: Completed 05-01-PLAN.md
 Resume file: None

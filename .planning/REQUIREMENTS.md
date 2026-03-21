@@ -49,9 +49,9 @@
 
 ### Frontend — Temporal Animation & Polish
 
-- [ ] **VIZ-01**: A time slider (2019–2025) lets users scrub through years; neighbourhood fill colours transition smoothly to reflect vibe changes per year
-- [ ] **VIZ-02**: Time slider includes a play/pause button that auto-advances through years with a configurable speed
-- [ ] **VIZ-03**: Colour transitions between years are interpolated smoothly (not a hard cut) using MapLibre paint property animation
+- [x] **VIZ-01**: A time slider (2019–2025) lets users scrub through years; neighbourhood fill colours transition smoothly to reflect vibe changes per year
+- [x] **VIZ-02**: Time slider includes a play/pause button that auto-advances through years with a configurable speed
+- [x] **VIZ-03**: Colour transitions between years are interpolated smoothly (not a hard cut) using MapLibre paint property animation
 - [ ] **VIZ-04**: Hovered neighbourhood pulses/glows to indicate it is interactive
 - [ ] **VIZ-05**: Dominant-vibe neighbourhood fills have a subtle glow effect (via MapLibre `fill-extrusion` or equivalent) that intensifies on hover
 - [ ] **VIZ-06**: Sidebar content (bars, pills, quotes) animates in on neighbourhood selection using Framer Motion
@@ -131,9 +131,9 @@
 | MAP-07 | Phase 4 | Complete |
 | MAP-08 | Phase 4 | Complete |
 | MAP-09 | Phase 4 | Complete |
-| VIZ-01 | Phase 5 | Pending |
-| VIZ-02 | Phase 5 | Pending |
-| VIZ-03 | Phase 5 | Pending |
+| VIZ-01 | Phase 5 | Complete |
+| VIZ-02 | Phase 5 | Complete |
+| VIZ-03 | Phase 5 | Complete |
 | VIZ-04 | Phase 5 | Pending |
 | VIZ-05 | Phase 5 | Pending |
 | VIZ-06 | Phase 5 | Pending |

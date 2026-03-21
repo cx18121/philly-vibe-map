@@ -104,7 +104,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — Types, store extension, temporal data hook, colour interpolation, TimeSlider component with play/pause
+- [x] 05-01-PLAN.md — Types, store extension, temporal data hook, colour interpolation, TimeSlider component with play/pause
 - [ ] 05-02-PLAN.md — VibeMap temporal colour updates, highlight/glow layers, DetailPanel stagger animations, and visual verification
 
 ### Phase 6: Deployment and Sharing
