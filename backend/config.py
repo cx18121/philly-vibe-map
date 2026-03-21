@@ -17,7 +17,7 @@ class Settings:
         default_factory=lambda: os.environ.get("HOST", "0.0.0.0")
     )
     port: int = field(
-        default_factory=lambda: int(os.environ.get("PORT", "8000"))
+        default_factory=lambda: int(os.environ.get("PORT", "8080"))
     )
 
 
