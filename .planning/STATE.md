@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 05-01-PLAN.md
-last_updated: "2026-03-21T18:53:46.219Z"
+stopped_at: Completed 05-02-PLAN.md
+last_updated: "2026-03-21T19:02:50.984Z"
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 17
-  completed_plans: 16
+  completed_plans: 17
 ---
 
 # Project State
@@ -62,6 +62,7 @@ Plan: 2 of 2
 | Phase 04-core-map P02 | 10min | 2 tasks | 6 files |
 | Phase 04-core-map P03 | 5min | 3 tasks | 10 files |
 | Phase 05-temporal-animation-and-polish P01 | 28min | 2 tasks | 10 files |
+| Phase 05-temporal-animation-and-polish P02 | 20min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -97,6 +98,8 @@ Recent decisions affecting current work:
 - [Phase 04-core-map]: DetailPanel reads from Zustand store directly; Sidebar/BottomSheet are pure layout containers rendering DetailPanel as child
 - [Phase 05]: vmForks pool for vitest on WSL2 -- threads and forks both timeout, vmForks works reliably
 - [Phase 05]: Reduced motion detection uses typeof guard for matchMedia -- jsdom compatibility
+- [Phase 05-temporal-animation-and-polish]: promoteId on GeoJSON source enables feature-state hover without data-join workarounds
+- [Phase 05-temporal-animation-and-polish]: Framer Motion staggerChildren on parent container with itemVariants -- avoids modifying VibeBars internal animation
 
 ### Pending Todos
 
@@ -109,6 +112,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-21T18:53:46.185Z
-Stopped at: Completed 05-01-PLAN.md
+Last session: 2026-03-21T19:02:50.949Z
+Stopped at: Completed 05-02-PLAN.md
 Resume file: None
