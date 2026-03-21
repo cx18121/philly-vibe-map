@@ -108,17 +108,18 @@ Plans:
 - [x] 05-02-PLAN.md — VibeMap temporal colour updates, highlight/glow layers, DetailPanel stagger animations, and visual verification
 
 ### Phase 6: Deployment and Sharing
-**Goal**: The complete app is live at a public URL where anyone can explore NYC neighbourhood vibes and share specific views via link
+**Goal**: The complete app is live at a public URL where anyone can explore Philadelphia neighbourhood vibes and share specific views via deep link
 **Depends on**: Phase 5
 **Requirements**: DEPLOY-01, DEPLOY-02, DEPLOY-03
 **Success Criteria** (what must be TRUE):
   1. Visiting the public frontend URL loads the full interactive map without requiring login or authentication
   2. The backend is deployed to a public URL and the frontend successfully fetches all data from it (no CORS errors, no failed requests)
   3. Selecting a neighbourhood and year updates the URL; copying and pasting that URL into a new browser tab restores the exact same view (selected neighbourhood and year)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 06-01: TBD
+- [ ] 06-01-PLAN.md — Dockerfile dynamic PORT fix, URL state sync module with tests, Vercel SPA config, commit serving artifacts to git
+- [ ] 06-02-PLAN.md — Push to GitHub, create render.yaml, deploy to Render and Vercel, human verification of live URLs
 
 ## Progress
 
@@ -132,4 +133,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 3. Backend API | 2/2 | Complete   | 2026-03-19 |
 | 4. Core Map | 3/3 | Complete   | 2026-03-21 |
 | 5. Temporal Animation and Polish | 2/2 | Complete   | 2026-03-21 |
-| 6. Deployment and Sharing | 0/? | Not started | - |
+| 6. Deployment and Sharing | 0/2 | Not started | - |
