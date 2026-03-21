@@ -101,11 +101,11 @@ Plans:
   2. Pressing play on the time slider auto-advances through years with visible colour transitions, and pause stops the animation at the current year
   3. Hovering a neighbourhood produces a visible pulse or glow effect, and dominant-vibe fills have a subtle ambient glow that intensifies on hover
   4. Selecting a neighbourhood triggers Framer Motion animations on sidebar content -- bars, pills, and quotes animate in rather than appearing instantly
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: TBD
-- [ ] 05-02: TBD
+- [ ] 05-01-PLAN.md — Types, store extension, temporal data hook, colour interpolation, TimeSlider component with play/pause
+- [ ] 05-02-PLAN.md — VibeMap temporal colour updates, highlight/glow layers, DetailPanel stagger animations, and visual verification
 
 ### Phase 6: Deployment and Sharing
 **Goal**: The complete app is live at a public URL where anyone can explore NYC neighbourhood vibes and share specific views via link
@@ -131,5 +131,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 2. NLP Pipeline | 5/5 | Complete   | 2026-03-19 |
 | 3. Backend API | 2/2 | Complete   | 2026-03-19 |
 | 4. Core Map | 3/3 | Complete   | 2026-03-21 |
-| 5. Temporal Animation and Polish | 0/? | Not started | - |
+| 5. Temporal Animation and Polish | 0/2 | In Progress | - |
 | 6. Deployment and Sharing | 0/? | Not started | - |
