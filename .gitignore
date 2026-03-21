@@ -1,6 +1,14 @@
 data/raw/
 data/output/reviews.db
 data/output/data_quality_report.json
+
+# Large ML artifacts (not needed for serving)
+data/output/artifacts/embeddings.npy
+data/output/artifacts/review_ids.npy
+data/output/artifacts/bertopic_model/
+data/output/artifacts/sentiment_model/
+data/output/artifacts/sentiment_checkpoints/
+data/output/artifacts/topic_assignments.json
 __pycache__/
 *.pyc
 .env
