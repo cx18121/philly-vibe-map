@@ -21,3 +21,6 @@ export interface SimilarNeighbourhood {
 }
 
 export type VibeArchetype = 'artsy' | 'foodie' | 'nightlife' | 'family' | 'upscale' | 'cultural';
+
+export type VibeVector = Record<string, number>;
+export type TemporalData = Record<string, Record<string, VibeVector>>;
