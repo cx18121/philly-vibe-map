@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 05-02-PLAN.md
-last_updated: "2026-03-21T19:02:50.984Z"
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-03-21T20:57:22.518Z"
 progress:
   total_phases: 6
   completed_phases: 5
-  total_plans: 17
-  completed_plans: 17
+  total_plans: 19
+  completed_plans: 18
 ---
 
 # Project State
@@ -19,11 +19,11 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-16)
 
 **Core value:** An interactive map where anyone can feel the character of a New York City neighbourhood through its reviews -- and watch how that character has shifted year by year from 2019 to 2025.
-**Current focus:** Phase 05 — temporal-animation-and-polish
+**Current focus:** Phase 06 — deployment-and-sharing
 
 ## Current Position
 
-Phase: 05 (temporal-animation-and-polish) — EXECUTING
+Phase: 06 (deployment-and-sharing) — EXECUTING
 Plan: 2 of 2
 
 ## Performance Metrics
@@ -63,6 +63,7 @@ Plan: 2 of 2
 | Phase 04-core-map P03 | 5min | 3 tasks | 10 files |
 | Phase 05-temporal-animation-and-polish P01 | 28min | 2 tasks | 10 files |
 | Phase 05-temporal-animation-and-polish P02 | 20min | 3 tasks | 5 files |
+| Phase 06-deployment-and-sharing P01 | 25min | 2 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,7 @@ Recent decisions affecting current work:
 - [Phase 05]: Reduced motion detection uses typeof guard for matchMedia -- jsdom compatibility
 - [Phase 05-temporal-animation-and-polish]: promoteId on GeoJSON source enables feature-state hover without data-join workarounds
 - [Phase 05-temporal-animation-and-polish]: Framer Motion staggerChildren on parent container with itemVariants -- avoids modifying VibeBars internal animation
+- [Phase 06-deployment-and-sharing]: initUrlSync returns unsubscribe for test cleanup; hydrateFromUrl gated on temporalData to avoid race condition; large ML artifacts gitignored while 8 serving artifacts committed
 
 ### Pending Todos
 
@@ -112,6 +114,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-21T19:02:50.949Z
-Stopped at: Completed 05-02-PLAN.md
+Last session: 2026-03-21T20:57:22.334Z
+Stopped at: Completed 06-01-PLAN.md
 Resume file: None

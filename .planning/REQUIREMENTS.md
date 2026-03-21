@@ -60,7 +60,7 @@
 
 - [ ] **DEPLOY-01**: Backend deployed to a public URL (Railway or Render) with artifacts loaded from Cloudflare R2 or committed JSON files
 - [ ] **DEPLOY-02**: Frontend deployed to Vercel with a public URL requiring no login
-- [ ] **DEPLOY-03**: URL encodes selected neighbourhood and current year so any state can be shared via link
+- [x] **DEPLOY-03**: URL encodes selected neighbourhood and current year so any state can be shared via link
 
 ## v2 Requirements
 
@@ -139,7 +139,7 @@
 | VIZ-06 | Phase 5 | Complete |
 | DEPLOY-01 | Phase 6 | Pending |
 | DEPLOY-02 | Phase 6 | Pending |
-| DEPLOY-03 | Phase 6 | Pending |
+| DEPLOY-03 | Phase 6 | Complete |
 
 **Coverage:**
 - v1 requirements: 38 total

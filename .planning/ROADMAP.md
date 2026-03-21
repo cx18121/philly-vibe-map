@@ -118,7 +118,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — Dockerfile dynamic PORT fix, URL state sync module with tests, Vercel SPA config, commit serving artifacts to git
+- [x] 06-01-PLAN.md — Dockerfile dynamic PORT fix, URL state sync module with tests, Vercel SPA config, commit serving artifacts to git
 - [ ] 06-02-PLAN.md — Push to GitHub, create render.yaml, deploy to Render and Vercel, human verification of live URLs
 
 ## Progress
