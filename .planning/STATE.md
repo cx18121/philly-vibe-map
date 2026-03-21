@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 03-02-PLAN.md (Phase 03 complete)
-last_updated: "2026-03-19T20:33:22.926Z"
+stopped_at: Completed 04-01-PLAN.md
+last_updated: "2026-03-21T06:38:14.716Z"
 progress:
   total_phases: 6
   completed_phases: 3
-  total_plans: 12
-  completed_plans: 12
+  total_plans: 15
+  completed_plans: 13
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-16)
 
 **Core value:** An interactive map where anyone can feel the character of a New York City neighbourhood through its reviews -- and watch how that character has shifted year by year from 2019 to 2025.
-**Current focus:** Phase 03 — backend-api
+**Current focus:** Phase 04 — core-map
 
 ## Current Position
 
-Phase: 03 (backend-api) — COMPLETE
-Plan: 2 of 2 (DONE)
+Phase: 04 (core-map) — EXECUTING
+Plan: 2 of 3
 
 ## Performance Metrics
 
@@ -58,6 +58,7 @@ Plan: 2 of 2 (DONE)
 | Phase 02-nlp-pipeline P05 | 12min | 2 tasks | 5 files |
 | Phase 03-backend-api P01 | 87min | 2 tasks | 7 files |
 | Phase 03-backend-api P02 | 3min | 2 tasks | 5 files |
+| Phase 04-core-map P01 | 9min | 3 tasks | 17 files |
 
 ## Accumulated Context
 
@@ -87,6 +88,8 @@ Recent decisions affecting current work:
 - [Phase 02-nlp-pipeline 02-05]: GeoJSON enrichment keyed on NEIGHBORHOOD_NUMBER; 11-artifact validation gate as final pipeline step
 - [Phase 03-backend-api 03-01]: Dataclass Settings instead of pydantic-settings; pre-serialized GeoJSON bytes for zero-cost serving; nid_to_name built from GeoJSON features at startup; FAISS reverse map for O(1) lookups; 13 total artifacts after adding neighbourhood_topics.json and review_counts.json
 - [Phase 03-backend-api 03-02]: Module-scoped TestClient fixture with context manager for Starlette 0.52+ lifespan; ARCHETYPE_ORDER constant for FAISS query vector construction; nid.zfill(3) zero-padding pattern across all endpoints
+- [Phase 04-core-map]: Explicit FeatureCollection import from geojson types instead of GeoJSON namespace for verbatimModuleSyntax compatibility
+- [Phase 04-core-map]: Wong-adapted colourblind-safe palette for 6 vibe archetypes; API_BASE defaults to empty string for Vite dev proxy routing
 
 ### Pending Todos
 
@@ -99,6 +102,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-19T20:23:00Z
-Stopped at: Completed 03-02-PLAN.md (Phase 03 complete)
-Resume file: .planning/phases/04-map-frontend/04-01-PLAN.md
+Last session: 2026-03-21T06:38:14.611Z
+Stopped at: Completed 04-01-PLAN.md
+Resume file: None
