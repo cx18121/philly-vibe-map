@@ -1,5 +1,6 @@
 import VibeMap from './components/VibeMap';
 import Legend from './components/Legend';
+import TimeSlider from './components/TimeSlider';
 import Sidebar from './components/Sidebar';
 import BottomSheet from './components/BottomSheet';
 import { useMapStore } from './store/mapStore';
@@ -16,6 +17,7 @@ export default function App() {
     <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
       <VibeMap />
       <Legend />
+      <TimeSlider />
       {isMobile
         ? <BottomSheet isOpen={isOpen} onClose={clearSelection} />
         : <Sidebar isOpen={isOpen} onClose={clearSelection} />

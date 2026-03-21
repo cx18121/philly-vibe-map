@@ -1,23 +1,15 @@
 import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
-import Map, { Source, Layer } from 'react-map-gl/maplibre';
+import Map, { Source, Layer, useMap } from 'react-map-gl/maplibre';
 import type { MapLayerMouseEvent } from 'react-map-gl/maplibre';
 import type { FillLayerSpecification, LineLayerSpecification } from 'maplibre-gl';
-import { VIBE_MATCH_EXPR } from '../lib/colors';
+import { VIBE_MATCH_EXPR, getInterpolatedColor } from '../lib/colors';
 import { BASEMAP_STYLE, INITIAL_VIEW } from '../lib/constants';
 import { useMapStore } from '../store/mapStore';
 import { useNeighbourhoods } from '../hooks/useNeighbourhoods';
 import { useNeighbourhoodDetail } from '../hooks/useNeighbourhoodDetail';
+import { useTemporal } from '../hooks/useTemporal';
 import MapSkeleton from './MapSkeleton';
 import Tooltip from './Tooltip';
-
-const fillLayer: Omit<FillLayerSpecification, 'source'> = {
-  id: 'neighbourhood-fill',
-  type: 'fill',
-  paint: {
-    'fill-color': VIBE_MATCH_EXPR as unknown as string,
-    'fill-opacity': 0.6,
-  },
-};
 
 const outlineLayer: Omit<LineLayerSpecification, 'source'> = {
   id: 'neighbourhood-outline',
@@ -29,13 +21,60 @@ const outlineLayer: Omit<LineLayerSpecification, 'source'> = {
   },
 };
 
+const highlightLayer: Omit<FillLayerSpecification, 'source'> = {
+  id: 'neighbourhood-highlight',
+  type: 'fill',
+  paint: {
+    'fill-color': '#ffffff',
+    'fill-opacity': [
+      'case',
+      ['boolean', ['feature-state', 'hover'], false],
+      0.15,
+      0.0,
+    ] as unknown as number,
+  },
+};
+
 export default function VibeMap() {
   const { geojson, loading } = useNeighbourhoods();
   useNeighbourhoodDetail();
 
+  const temporalData = useTemporal();
+  const currentYear = useMapStore((s) => s.currentYear);
+  const hoveredId = useMapStore((s) => s.hoveredId);
   const setSelected = useMapStore((s) => s.setSelected);
   const setHovered = useMapStore((s) => s.setHovered);
   const clearSelection = useMapStore((s) => s.clearSelection);
+
+  const { current: mapInstance } = useMap();
+  const prevHoveredRef = useRef<string | null>(null);
+
+  // Feature-state hover management
+  useEffect(() => {
+    if (!mapInstance) return;
+    const prev = prevHoveredRef.current;
+    if (prev !== null) {
+      try {
+        mapInstance.setFeatureState(
+          { source: 'neighbourhoods', id: prev },
+          { hover: false },
+        );
+      } catch {
+        // source may not be loaded yet
+      }
+    }
+    if (hoveredId !== null) {
+      try {
+        mapInstance.setFeatureState(
+          { source: 'neighbourhoods', id: hoveredId },
+          { hover: true },
+        );
+      } catch {
+        // source may not be loaded yet
+      }
+    }
+    prevHoveredRef.current = hoveredId;
+  }, [hoveredId, mapInstance]);
 
   const [tooltipInfo, setTooltipInfo] = useState<{
     x: number;
@@ -54,6 +93,39 @@ export default function VibeMap() {
         .filter(Boolean) ?? [],
     [geojson],
   );
+
+  // Compute GeoJSON with temporal fill colours baked in
+  const computedGeojson = useMemo(() => {
+    if (!geojson) return null;
+    if (!temporalData || currentYear <= 0) return geojson;
+
+    return {
+      ...geojson,
+      features: geojson.features.map((f) => ({
+        ...f,
+        properties: {
+          ...f.properties,
+          _fillColor: getInterpolatedColor(
+            temporalData,
+            f.properties?.NEIGHBORHOOD_NUMBER ?? '',
+            currentYear,
+          ),
+        },
+      })),
+    };
+  }, [geojson, temporalData, currentYear]);
+
+  // Dynamic fill layer spec based on whether temporal data is active
+  const fillLayerSpec: Omit<FillLayerSpecification, 'source'> = useMemo(() => ({
+    id: 'neighbourhood-fill',
+    type: 'fill',
+    paint: {
+      'fill-color': temporalData
+        ? (['get', '_fillColor'] as unknown as string)
+        : (VIBE_MATCH_EXPR as unknown as string),
+      'fill-opacity': 0.6,
+    },
+  }), [temporalData]);
 
   const handleHover = useCallback(
     (event: MapLayerMouseEvent) => {
@@ -116,13 +188,19 @@ export default function VibeMap() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [focusIndex, neighbourhoodIds, clearSelection, setHovered, setSelected]);
 
-  if (loading || !geojson) {
+  if (loading || !computedGeojson) {
     return <MapSkeleton />;
   }
 
   return (
     <div
-      style={{ width: '100%', height: '100vh', position: 'relative' }}
+      style={{
+        width: '100%',
+        height: '100vh',
+        position: 'relative',
+        filter: hoveredId ? 'drop-shadow(0 0 8px rgba(255,255,255,0.4))' : 'none',
+        transition: 'filter 150ms ease',
+      }}
       tabIndex={0}
       ref={mapRef}
       aria-label="Neighbourhood vibe map. Use Tab to navigate, Enter to select, Escape to close."
@@ -136,8 +214,9 @@ export default function VibeMap() {
         onMouseLeave={handleMouseLeave}
         onClick={handleClick}
       >
-        <Source id="neighbourhoods" type="geojson" data={geojson}>
-          <Layer {...fillLayer} />
+        <Source id="neighbourhoods" type="geojson" data={computedGeojson} promoteId="NEIGHBORHOOD_NUMBER">
+          <Layer {...fillLayerSpec} />
+          <Layer {...highlightLayer} />
           <Layer {...outlineLayer} />
         </Source>
       </Map>

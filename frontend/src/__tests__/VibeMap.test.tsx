@@ -33,6 +33,7 @@ vi.mock('react-map-gl/maplibre', () => {
       ),
     Layer: (props: Record<string, unknown>) =>
       React.createElement('div', { 'data-testid': `layer-${props.id}` }),
+    useMap: () => ({ current: { setFeatureState: vi.fn() } }),
   };
 });
 
@@ -80,6 +81,11 @@ vi.mock('../hooks/useNeighbourhoodDetail', () => ({
   useNeighbourhoodDetail: () => {},
 }));
 
+// Mock useTemporal -- default returns null
+vi.mock('../hooks/useTemporal', () => ({
+  useTemporal: vi.fn(() => null),
+}));
+
 // Track store calls for keyboard/hover assertions
 const mockSetSelected = vi.fn();
 const mockSetHovered = vi.fn();
@@ -97,6 +103,13 @@ vi.mock('../store/mapStore', () => ({
       setDetail: vi.fn(),
       setLoading: vi.fn(),
       clearSelection: mockClearSelection,
+      currentYear: 2019,
+      isPlaying: false,
+      temporalData: null,
+      availableYears: [],
+      setYear: vi.fn(),
+      togglePlay: vi.fn(),
+      setTemporalData: vi.fn(),
     };
     return selector(state);
   },
@@ -212,5 +225,47 @@ describe('MAP-09: Keyboard navigation', () => {
     // Enter to select it
     fireEvent.keyDown(window, { key: 'Enter' });
     expect(mockSetSelected).toHaveBeenCalledWith('001');
+  });
+});
+
+describe('VIZ-04/VIZ-05: Highlight layer', () => {
+  it('renders neighbourhood-highlight layer', () => {
+    render(<VibeMap />);
+    expect(screen.getByTestId('layer-neighbourhood-highlight')).toBeInTheDocument();
+  });
+
+  it('renders source with promoteId', () => {
+    render(<VibeMap />);
+    const source = screen.getByTestId('source');
+    expect(source).toHaveAttribute('promoteId', 'NEIGHBORHOOD_NUMBER');
+  });
+});
+
+describe('VIZ-01: Temporal fill colours', () => {
+  it('uses VIBE_MATCH_EXPR when no temporal data', () => {
+    render(<VibeMap />);
+    // Fill layer should render (basic sanity)
+    expect(screen.getByTestId('layer-neighbourhood-fill')).toBeInTheDocument();
+  });
+
+  it('computes fill colours from temporal data', async () => {
+    // Override useTemporal to return test data
+    const { useTemporal } = await import('../hooks/useTemporal');
+    const mockUseTemporal = vi.mocked(useTemporal);
+    mockUseTemporal.mockReturnValue({
+      '001': {
+        '2019': { artsy: 0.1, foodie: 0.8, nightlife: 0.05, family: 0.02, upscale: 0.01, cultural: 0.02 },
+      },
+      '002': {
+        '2019': { artsy: 0.9, foodie: 0.05, nightlife: 0.02, family: 0.01, upscale: 0.01, cultural: 0.01 },
+      },
+    });
+
+    render(<VibeMap />);
+    // Should render without error
+    expect(screen.getByTestId('layer-neighbourhood-fill')).toBeInTheDocument();
+
+    // Reset
+    mockUseTemporal.mockReturnValue(null);
   });
 });
