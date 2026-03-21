@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-03-21T06:51:08.775Z"
+stopped_at: Completed 04-03-PLAN.md
+last_updated: "2026-03-21T07:19:06.909Z"
 progress:
   total_phases: 6
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 15
-  completed_plans: 14
+  completed_plans: 15
 ---
 
 # Project State
@@ -60,6 +60,7 @@ Plan: 3 of 3
 | Phase 03-backend-api P02 | 3min | 2 tasks | 5 files |
 | Phase 04-core-map P01 | 9min | 3 tasks | 17 files |
 | Phase 04-core-map P02 | 10min | 2 tasks | 6 files |
+| Phase 04-core-map P03 | 5min | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -92,6 +93,7 @@ Recent decisions affecting current work:
 - [Phase 04-core-map]: Explicit FeatureCollection import from geojson types instead of GeoJSON namespace for verbatimModuleSyntax compatibility
 - [Phase 04-core-map]: Wong-adapted colourblind-safe palette for 6 vibe archetypes; API_BASE defaults to empty string for Vite dev proxy routing
 - [Phase 04-core-map]: FillLayerSpecification/LineLayerSpecification from maplibre-gl for layer typing; captured-handler mock pattern for react-map-gl test invocation
+- [Phase 04-core-map]: DetailPanel reads from Zustand store directly; Sidebar/BottomSheet are pure layout containers rendering DetailPanel as child
 
 ### Pending Todos
 
@@ -104,6 +106,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-21T06:51:08.639Z
-Stopped at: Completed 04-02-PLAN.md
+Last session: 2026-03-21T07:19:06.883Z
+Stopped at: Completed 04-03-PLAN.md
 Resume file: None

@@ -40,10 +40,10 @@
 - [x] **MAP-01**: Map renders with a dark basemap and semi-transparent neighbourhood fills coloured by dominant vibe archetype
 - [x] **MAP-02**: Each vibe archetype has a distinct colour: artsy (purple), foodie (orange), nightlife (cyan), family (green), upscale (gold), cultural (red) — palette tested for colourblind accessibility
 - [x] **MAP-03**: Hovering a neighbourhood displays a tooltip with neighbourhood name and dominant vibe
-- [ ] **MAP-04**: Clicking a neighbourhood opens a sidebar showing: vibe archetype breakdown (animated bar chart), top topics, vibe pills with sentiment scores, and 3 representative review quotes
+- [x] **MAP-04**: Clicking a neighbourhood opens a sidebar showing: vibe archetype breakdown (animated bar chart), top topics, vibe pills with sentiment scores, and 3 representative review quotes
 - [x] **MAP-05**: A legend explains the 6 vibe colour codes
 - [x] **MAP-06**: Map renders loading skeleton while GeoJSON and temporal data are fetching
-- [ ] **MAP-07**: App is responsive: sidebar collapses to a bottom sheet on mobile viewports
+- [x] **MAP-07**: App is responsive: sidebar collapses to a bottom sheet on mobile viewports
 - [x] **MAP-08**: Neighbourhood boundary outlines are visible on the dark basemap
 - [x] **MAP-09**: Basic keyboard navigation: tab to neighbourhoods, enter to select, escape to dismiss sidebar
 
@@ -125,10 +125,10 @@
 | MAP-01 | Phase 4 | Complete |
 | MAP-02 | Phase 4 | Complete |
 | MAP-03 | Phase 4 | Complete |
-| MAP-04 | Phase 4 | Pending |
+| MAP-04 | Phase 4 | Complete |
 | MAP-05 | Phase 4 | Complete |
 | MAP-06 | Phase 4 | Complete |
-| MAP-07 | Phase 4 | Pending |
+| MAP-07 | Phase 4 | Complete |
 | MAP-08 | Phase 4 | Complete |
 | MAP-09 | Phase 4 | Complete |
 | VIZ-01 | Phase 5 | Pending |
