@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 04-01-PLAN.md
-last_updated: "2026-03-21T06:38:14.716Z"
+stopped_at: Completed 04-02-PLAN.md
+last_updated: "2026-03-21T06:51:08.775Z"
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 15
-  completed_plans: 13
+  completed_plans: 14
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 ## Current Position
 
 Phase: 04 (core-map) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 
 ## Performance Metrics
 
@@ -59,6 +59,7 @@ Plan: 2 of 3
 | Phase 03-backend-api P01 | 87min | 2 tasks | 7 files |
 | Phase 03-backend-api P02 | 3min | 2 tasks | 5 files |
 | Phase 04-core-map P01 | 9min | 3 tasks | 17 files |
+| Phase 04-core-map P02 | 10min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,7 @@ Recent decisions affecting current work:
 - [Phase 03-backend-api 03-02]: Module-scoped TestClient fixture with context manager for Starlette 0.52+ lifespan; ARCHETYPE_ORDER constant for FAISS query vector construction; nid.zfill(3) zero-padding pattern across all endpoints
 - [Phase 04-core-map]: Explicit FeatureCollection import from geojson types instead of GeoJSON namespace for verbatimModuleSyntax compatibility
 - [Phase 04-core-map]: Wong-adapted colourblind-safe palette for 6 vibe archetypes; API_BASE defaults to empty string for Vite dev proxy routing
+- [Phase 04-core-map]: FillLayerSpecification/LineLayerSpecification from maplibre-gl for layer typing; captured-handler mock pattern for react-map-gl test invocation
 
 ### Pending Todos
 
@@ -102,6 +104,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-21T06:38:14.611Z
-Stopped at: Completed 04-01-PLAN.md
+Last session: 2026-03-21T06:51:08.639Z
+Stopped at: Completed 04-02-PLAN.md
 Resume file: None

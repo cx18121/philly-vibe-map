@@ -89,7 +89,7 @@ Plans:
 
 Plans:
 - [x] 04-01-PLAN.md — Vite project scaffold, dependencies, TypeScript/Vitest config, foundational modules (types, colours, store, API hooks, skeleton)
-- [ ] 04-02-PLAN.md — MapLibre choropleth with fill/outline layers, hover tooltip, click handler, and colour legend
+- [x] 04-02-PLAN.md — MapLibre choropleth with fill/outline layers, hover tooltip, click handler, and colour legend
 - [ ] 04-03-PLAN.md — Detail sidebar/bottom-sheet with vibe bars, topics, sentiment pills, quotes, keyboard navigation, and human verification
 
 ### Phase 5: Temporal Animation and Polish
@@ -130,6 +130,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 1. Data Foundation (Philadelphia) | 5/5 | Complete   | 2026-03-16 |
 | 2. NLP Pipeline | 5/5 | Complete   | 2026-03-19 |
 | 3. Backend API | 2/2 | Complete   | 2026-03-19 |
-| 4. Core Map | 1/3 | In Progress|  |
+| 4. Core Map | 2/3 | In Progress|  |
 | 5. Temporal Animation and Polish | 0/? | Not started | - |
 | 6. Deployment and Sharing | 0/? | Not started | - |
