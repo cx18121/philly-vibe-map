@@ -227,11 +227,14 @@ def run_vibe_score(db_path: str, artifacts_dir: Path, force: bool = False) -> di
         neighbourhood_scores[nid] = scores
 
     # 7. Two-pass normalization:
-    #    Pass A — cross-neighbourhood z-score per archetype: makes the map
-    #             show which neighbourhoods are most distinctive for each vibe
-    #             relative to the city as a whole (removes global foodie bias).
-    #    Pass B — per-neighbourhood clip to [0, inf): suppresses archetypes
-    #             that are below this neighbourhood's own average.
+    #    Pass A — cross-neighbourhood z-score per archetype: surfaces which
+    #             neighbourhoods are most distinctive for each vibe relative
+    #             to the city as a whole (removes global foodie/artsy bias).
+    #    Pass B — per-neighbourhood min-shift to [0, inf): subtracts each
+    #             neighbourhood's minimum z-score so the weakest archetype
+    #             lands at 0 rather than clipping everything negative to 0.
+    #             This guarantees every neighbourhood has a clear winner even
+    #             when all raw z-scores are below the city mean.
     archetype_names = list(archetypes.keys())
     all_nids = list(neighbourhood_scores.keys())
 
@@ -246,11 +249,12 @@ def run_vibe_score(db_path: str, artifacts_dir: Path, force: bool = False) -> di
         for nid, v in zip(all_nids, normed):
             neighbourhood_scores[nid][arch] = float(v)
 
-    # Pass B: clip negatives within each neighbourhood
+    # Pass B: shift each neighbourhood so its minimum z-score becomes 0
     for nid in all_nids:
         scores = neighbourhood_scores[nid]
+        min_val = min(scores.values())
         neighbourhood_scores[nid] = {
-            a: max(0.0, scores[a]) for a in archetype_names
+            a: scores[a] - min_val for a in archetype_names
         }
 
     # 8. Save artifact
