@@ -42,6 +42,7 @@ class TestTopicModelUnit:
 
             mock_model = MagicMock()
             mock_model.fit_transform.return_value = (mock_topics, mock_probs)
+            mock_model.transform.return_value = (mock_topics, None)
             mock_model.reduce_outliers.return_value = mock_topics
             mock_model.get_topic_info.return_value = MagicMock()
             MockBT.return_value = mock_model
@@ -65,6 +66,7 @@ class TestTopicModelUnit:
 
             mock_model = MagicMock()
             mock_model.fit_transform.return_value = (mock_topics, mock_probs)
+            mock_model.transform.return_value = (mock_topics, None)
             mock_model.reduce_outliers.return_value = mock_topics
             mock_model.get_topic_info.return_value = MagicMock()
             MockBT.return_value = mock_model
@@ -93,6 +95,7 @@ class TestTopicModelUnit:
 
             mock_model = MagicMock()
             mock_model.fit_transform.return_value = (mock_topics, mock_probs)
+            mock_model.transform.return_value = (mock_topics, None)
             mock_model.reduce_outliers.return_value = mock_topics
             mock_model.get_topic_info.return_value = MagicMock()
             MockBT.return_value = mock_model
@@ -118,6 +121,7 @@ class TestTopicModelUnit:
 
             mock_model = MagicMock()
             mock_model.fit_transform.return_value = (mock_topics, mock_probs)
+            mock_model.transform.return_value = (mock_topics, None)
             mock_model.reduce_outliers.return_value = reduced_topics
             mock_model.get_topic_info.return_value = MagicMock()
             MockBT.return_value = mock_model
@@ -141,6 +145,7 @@ class TestTopicModelUnit:
 
             mock_model = MagicMock()
             mock_model.fit_transform.return_value = (mock_topics, mock_probs)
+            mock_model.transform.return_value = (mock_topics, None)
             mock_model.reduce_outliers.return_value = mock_topics
             mock_model.get_topic_info.return_value = MagicMock()
             MockBT.return_value = mock_model

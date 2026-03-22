@@ -84,11 +84,12 @@ class TestArtifactGate:
         result = run_sentiment(db_path="unused", artifacts_dir=mock_artifacts_dir)
         assert result == {"skipped": True}
 
-    def test_does_not_skip_when_force(self, mock_artifacts_dir):
+    def test_does_not_skip_when_force(self, mock_artifacts_dir, monkeypatch, tmp_path):
         """run_sentiment does not skip even if dir exists when force=True."""
         (mock_artifacts_dir / "sentiment_model").mkdir()
-        # With force=True and no actual data, it should attempt to run
-        # (and fail because there's no Yelp data). We just verify it doesn't return skipped.
+        # Point YELP_DATA_DIR at an empty temp dir so _load_yelp_reviews raises
+        # FileNotFoundError immediately, regardless of what exists in the project root.
+        monkeypatch.setenv("YELP_DATA_DIR", str(tmp_path / "no_data"))
         with pytest.raises(Exception):
             run_sentiment(db_path="unused", artifacts_dir=mock_artifacts_dir, force=True)
 

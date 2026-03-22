@@ -21,7 +21,7 @@ const outlineLayer: Omit<LineLayerSpecification, 'source'> = {
   },
 };
 
-const highlightLayer: Omit<FillLayerSpecification, 'source'> = {
+const highlightFillLayer: Omit<FillLayerSpecification, 'source'> = {
   id: 'neighbourhood-highlight',
   type: 'fill',
   paint: {
@@ -29,8 +29,28 @@ const highlightLayer: Omit<FillLayerSpecification, 'source'> = {
     'fill-opacity': [
       'case',
       ['boolean', ['feature-state', 'hover'], false],
-      0.15,
+      0.18,
       0.0,
+    ] as unknown as number,
+  },
+};
+
+const highlightLineLayer: Omit<LineLayerSpecification, 'source'> = {
+  id: 'neighbourhood-highlight-line',
+  type: 'line',
+  paint: {
+    'line-color': '#ffffff',
+    'line-width': [
+      'case',
+      ['boolean', ['feature-state', 'hover'], false],
+      2.5,
+      0,
+    ] as unknown as number,
+    'line-opacity': [
+      'case',
+      ['boolean', ['feature-state', 'hover'], false],
+      0.9,
+      0,
     ] as unknown as number,
   },
 };
@@ -198,8 +218,6 @@ export default function VibeMap() {
         width: '100%',
         height: '100vh',
         position: 'relative',
-        filter: hoveredId ? 'drop-shadow(0 0 8px rgba(255,255,255,0.4))' : 'none',
-        transition: 'filter 150ms ease',
       }}
       tabIndex={0}
       ref={mapRef}
@@ -216,7 +234,8 @@ export default function VibeMap() {
       >
         <Source id="neighbourhoods" type="geojson" data={computedGeojson} promoteId="NEIGHBORHOOD_NUMBER">
           <Layer {...fillLayerSpec} />
-          <Layer {...highlightLayer} />
+          <Layer {...highlightFillLayer} />
+          <Layer {...highlightLineLayer} />
           <Layer {...outlineLayer} />
         </Source>
       </Map>

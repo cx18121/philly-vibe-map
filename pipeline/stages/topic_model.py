@@ -5,6 +5,7 @@ import datetime
 import json
 import sqlite3
 import sys
+import time
 from pathlib import Path
 
 import numpy as np
@@ -58,6 +59,11 @@ def run_topic_model(db_path: str, artifacts_dir: Path, force: bool = False) -> d
 
     _log("INFO", "Stage 'topic_model': starting...")
 
+    checkpoint_path = artifacts_dir / "_topics_checkpoint.npy"
+    if force and checkpoint_path.exists():
+        checkpoint_path.unlink()
+        _log("INFO", "Cleared stale transform checkpoint (--force)")
+
     # ---- Load pre-computed embeddings ----
     embeddings = np.load(artifacts_dir / "embeddings.npy")
     review_ids = np.load(artifacts_dir / "review_ids.npy")
@@ -70,12 +76,28 @@ def run_topic_model(db_path: str, artifacts_dir: Path, force: bool = False) -> d
     )
     _log("INFO", f"Loaded {len(docs):,} review texts from DB")
 
+    # ---- Subsample for fitting (UMAP/HDBSCAN can't handle ~1M points) ----
+    FIT_SAMPLE = 100_000
+    n_total = len(docs)
+    if n_total > FIT_SAMPLE:
+        rng = np.random.default_rng(42)
+        sample_idx = rng.choice(n_total, size=FIT_SAMPLE, replace=False)
+        sample_idx.sort()
+        sample_docs = [docs[i] for i in sample_idx]
+        sample_embeddings = embeddings[sample_idx]
+        _log("INFO", f"Subsampled {FIT_SAMPLE:,} / {n_total:,} reviews for BERTopic fit")
+    else:
+        sample_idx = None
+        sample_docs = docs
+        sample_embeddings = embeddings
+
     # ---- Configure BERTopic components ----
     umap_model = UMAP(
         n_components=5,
         n_neighbors=15,
         min_dist=0.0,
         metric="cosine",
+        low_memory=True,
         random_state=42,
     )
     hdbscan_model = HDBSCAN(
@@ -87,13 +109,40 @@ def run_topic_model(db_path: str, artifacts_dir: Path, force: bool = False) -> d
     topic_model = BERTopic(
         umap_model=umap_model,
         hdbscan_model=hdbscan_model,
-        calculate_probabilities=True,
+        calculate_probabilities=False,
         verbose=True,
     )
 
-    # ---- Fit BERTopic with pre-computed embeddings ----
-    _log("INFO", "Fitting BERTopic...")
-    topics, probs = topic_model.fit_transform(docs, embeddings=embeddings)
+    # ---- Fit on sample, transform full corpus ----
+    _log("INFO", "Fitting BERTopic on sample...")
+    topic_model.fit_transform(sample_docs, embeddings=sample_embeddings)
+
+    _log("INFO", f"Transforming full corpus ({n_total:,} reviews)...")
+    TRANSFORM_BATCH = 25_000   # smaller batches = lower peak RAM per step
+    BATCH_PAUSE_S = 2.0        # seconds to sleep between batches (lets RAM/CPU settle)
+
+    # Resume from checkpoint if it exists and covers fewer than all reviews
+    if checkpoint_path.exists():
+        all_topics = list(np.load(checkpoint_path, allow_pickle=False).astype(int))
+        resume_start = len(all_topics)
+        _log("INFO", f"Resuming from checkpoint: {resume_start:,} / {n_total:,} already done")
+    else:
+        all_topics = []
+        resume_start = 0
+
+    for start in range(resume_start, n_total, TRANSFORM_BATCH):
+        batch_docs = docs[start : start + TRANSFORM_BATCH]
+        batch_emb = embeddings[start : start + TRANSFORM_BATCH]
+        batch_topics, _ = topic_model.transform(batch_docs, embeddings=batch_emb)
+        all_topics.extend(batch_topics)
+        np.save(checkpoint_path, np.array(all_topics, dtype=np.int32))
+        done = min(start + TRANSFORM_BATCH, n_total)
+        _log("INFO", f"  Transformed {done:,} / {n_total:,} — pausing {BATCH_PAUSE_S}s")
+        if done < n_total:
+            time.sleep(BATCH_PAUSE_S)
+
+    topics = all_topics
+    probs = None  # not computed (calculate_probabilities=False)
 
     # ---- Outlier reduction chain ----
     outlier_count = sum(1 for t in topics if t == -1)
@@ -106,17 +155,30 @@ def run_topic_model(db_path: str, artifacts_dir: Path, force: bool = False) -> d
     outlier_rate = sum(1 for t in new_topics if t == -1) / len(new_topics)
     _log("INFO", f"After c-TF-IDF reduction: {outlier_rate:.1%}")
 
-    # Strategy 2: embeddings if still above 50%
+    # Strategy 2: embeddings if still above 50% — sample-based to avoid OOM
     if outlier_rate > 0.5:
-        new_topics = topic_model.reduce_outliers(
-            docs, new_topics, strategy="embeddings",
-            embeddings=embeddings,
+        _log("WARN", "Outlier rate still high; applying embeddings strategy on sample")
+        outlier_mask = np.array([t == -1 for t in new_topics])
+        outlier_indices = np.where(outlier_mask)[0]
+        # cap at 200K to stay memory-safe
+        if len(outlier_indices) > 200_000:
+            rng2 = np.random.default_rng(0)
+            outlier_indices = rng2.choice(outlier_indices, 200_000, replace=False)
+            outlier_indices.sort()
+        sub_docs = [docs[i] for i in outlier_indices]
+        sub_emb = embeddings[outlier_indices]
+        sub_topics = [new_topics[i] for i in outlier_indices]
+        reduced = topic_model.reduce_outliers(
+            sub_docs, sub_topics, strategy="embeddings", embeddings=sub_emb
         )
+        for idx, new_t in zip(outlier_indices, reduced):
+            new_topics[idx] = new_t
         outlier_rate = sum(1 for t in new_topics if t == -1) / len(new_topics)
         _log("INFO", f"After embeddings reduction: {outlier_rate:.1%}")
 
     # CRITICAL: update topic representations after outlier reduction
-    topic_model.update_topics(docs, topics=new_topics)
+    # use sample docs/embeddings — c-TF-IDF update doesn't need the full corpus
+    topic_model.update_topics(sample_docs, topics=[new_topics[i] for i in sample_idx] if sample_idx is not None else new_topics)
 
     # ---- Save BERTopic model ----
     _log("INFO", "Saving BERTopic model with safetensors serialization...")
@@ -133,6 +195,11 @@ def run_topic_model(db_path: str, artifacts_dir: Path, force: bool = False) -> d
     with open(assignments_path, "w") as f:
         json.dump(assignments, f, indent=2)
     _log("INFO", f"Saved topic assignments to {assignments_path}")
+
+    # Clean up transform checkpoint now that we have a complete run
+    if checkpoint_path.exists():
+        checkpoint_path.unlink()
+        _log("INFO", "Removed transform checkpoint")
 
     # ---- Log summary ----
     n_topics = len(set(new_topics) - {-1})

@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import datetime
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -34,21 +35,50 @@ def load_artifacts(artifacts_dir: Path) -> dict:
     """
     import faiss
 
-    # GeoJSON
+    # GeoJSON — loaded first; dominant_vibe will be patched after vibe_scores normalisation
     with open(artifacts_dir / "enriched_geojson.geojson") as f:
         geojson = json.load(f)
-    geojson_bytes = json.dumps(geojson).encode("utf-8")
-    _log("INFO", f"GeoJSON loaded: {len(geojson['features'])} features, {len(geojson_bytes):,} bytes pre-serialized")
 
-    # Vibe scores
+    # Vibe scores — vibe_score.py already applies cross-neighbourhood z-score
+    # normalization + clip, so scores are already on a comparable scale.
     with open(artifacts_dir / "vibe_scores.json") as f:
         vibe_scores = json.load(f)
+    archetypes = list(next(iter(vibe_scores.values())).keys())
     _log("INFO", f"Vibe scores loaded: {len(vibe_scores)} neighbourhoods")
 
-    # Temporal series
+    # Patch GeoJSON dominant_vibe/vibe_scores with normalised values
+    for feature in geojson["features"]:
+        nid = feature.get("properties", {}).get("NEIGHBORHOOD_NUMBER")
+        if nid and nid in vibe_scores:
+            scores = vibe_scores[nid]
+            dominant = max(scores, key=scores.get)
+            feature["properties"]["vibe_scores"] = scores
+            feature["properties"]["dominant_vibe"] = dominant
+            feature["properties"]["dominant_vibe_score"] = scores[dominant]
+    geojson_bytes = json.dumps(geojson).encode("utf-8")
+    _log("INFO", f"GeoJSON patched with normalised vibes: {len(geojson['features'])} features, {len(geojson_bytes):,} bytes pre-serialized")
+
+    # Temporal series — apply the same cross-neighbourhood z-score normalization
+    # per year per archetype so time-slider colors are consistent with the static map.
+
     with open(artifacts_dir / "temporal_series.json") as f:
         temporal = json.load(f)
-    _log("INFO", f"Temporal series loaded: {len(temporal)} neighbourhoods")
+
+    all_years = sorted({year for nid_data in temporal.values() for year in nid_data})
+    for year in all_years:
+        nids_this_year = [nid for nid, d in temporal.items() if year in d]
+        if not nids_this_year:
+            continue
+        for arch in archetypes:
+            vals = [temporal[nid][year].get(arch, 0.0) for nid in nids_this_year]
+            mean = sum(vals) / len(vals)
+            variance = sum((v - mean) ** 2 for v in vals) / len(vals)
+            std = math.sqrt(variance)
+            for nid, v in zip(nids_this_year, vals):
+                normed = (v - mean) / std if std > 0 else v - mean
+                temporal[nid][year][arch] = max(0.0, normed)
+
+    _log("INFO", f"Temporal series loaded and normalised: {len(temporal)} neighbourhoods, {len(all_years)} years")
 
     # Representative quotes
     with open(artifacts_dir / "representative_quotes.json") as f:

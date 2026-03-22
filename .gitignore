@@ -1,6 +1,17 @@
 data/raw/
 data/output/reviews.db
+data/output/yelp_philly.db*
 data/output/data_quality_report.json
+
+# Raw Yelp dataset files
+yelp_academic_dataset_*.json
+yelp_academic_dataset_*.zip
+
+# Trained model archives
+sentiment_model.zip
+
+# Python virtual environment
+.venv/
 
 # Large ML artifacts (not needed for serving)
 data/output/artifacts/embeddings.npy

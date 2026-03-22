@@ -23,6 +23,12 @@ TRAIN_BATCH_SIZE = 32
 LEARNING_RATE = 2e-4
 MAX_SEQ_LENGTH = 256
 
+# CPU-specific overrides (applied when CUDA is unavailable)
+CPU_TRAIN_BATCH_SIZE = 4
+CPU_GRADIENT_ACCUM_STEPS = 8  # effective batch = 4 * 8 = 32
+CPU_MAX_TRAIN_SAMPLES = 50_000
+CPU_TRAIN_EPOCHS = 1
+
 
 def _log(level: str, msg: str) -> None:
     ts = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
@@ -136,14 +142,14 @@ def run_sentiment(db_path: str, artifacts_dir: Path, force: bool = False) -> dic
     _log("INFO", "Stage 'sentiment': starting...")
 
     # ------------------------------------------------------------------
-    # CPU fallback: auto-limit training data if no GPU available
+    # CPU fallback: constrain memory footprint when no GPU is available
     # ------------------------------------------------------------------
     max_samples = MAX_TRAIN_SAMPLES
-    if not torch.cuda.is_available():
-        _log("WARN", "CUDA not available -- training on CPU. This will be slow for large datasets. "
-             "Set MAX_TRAIN_SAMPLES to limit training data.")
+    on_cpu = not torch.cuda.is_available()
+    if on_cpu:
+        _log("WARN", "CUDA not available -- using CPU-optimised training settings")
         if max_samples == 0:
-            max_samples = 500_000
+            max_samples = CPU_MAX_TRAIN_SAMPLES
             _log("WARN", f"Auto-setting MAX_TRAIN_SAMPLES to {max_samples:,} for CPU training")
 
     # ------------------------------------------------------------------
@@ -213,16 +219,30 @@ def run_sentiment(db_path: str, artifacts_dir: Path, force: bool = False) -> dic
     # Training
     # ------------------------------------------------------------------
     checkpoints_dir = str(artifacts_dir / "sentiment_checkpoints")
+
+    batch_size = CPU_TRAIN_BATCH_SIZE if on_cpu else TRAIN_BATCH_SIZE
+    grad_accum = CPU_GRADIENT_ACCUM_STEPS if on_cpu else 1
+    epochs = CPU_TRAIN_EPOCHS if on_cpu else TRAIN_EPOCHS
+    total_steps = (len(train_dataset) // batch_size) * epochs
+    warmup_steps = int(total_steps * 0.1)
+
+    _log("INFO", f"Training config: batch_size={batch_size}, grad_accum={grad_accum}, "
+         f"epochs={epochs}, total_steps~{total_steps}, warmup_steps={warmup_steps}, cpu={on_cpu}")
+
     training_args = TrainingArguments(
         output_dir=checkpoints_dir,
-        num_train_epochs=TRAIN_EPOCHS,
-        per_device_train_batch_size=TRAIN_BATCH_SIZE,
+        num_train_epochs=epochs,
+        per_device_train_batch_size=batch_size,
+        gradient_accumulation_steps=grad_accum,
         learning_rate=LEARNING_RATE,
-        warmup_ratio=0.1,
-        logging_steps=500,
+        warmup_steps=warmup_steps,
+        logging_steps=100,
         save_strategy="epoch",
         report_to="none",
         remove_unused_columns=False,
+        # CPU memory optimisations
+        optim="adafactor" if on_cpu else "adamw_torch",
+        gradient_checkpointing=on_cpu,
     )
 
     trainer = WeightedTrainer(
@@ -251,6 +271,6 @@ def run_sentiment(db_path: str, artifacts_dir: Path, force: bool = False) -> dic
     return {
         "skipped": False,
         "train_samples": len(train_dataset),
-        "epochs": TRAIN_EPOCHS,
+        "epochs": epochs,
         "model_dir": output_dir,
     }

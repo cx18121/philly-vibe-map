@@ -181,7 +181,7 @@ def run_vibe_score(db_path: str, artifacts_dir: Path, force: bool = False) -> di
     _log("INFO", f"Embedded {len(archetypes)} archetype centroids")
 
     # 2. Load pre-computed embeddings and topic assignments
-    embeddings = np.load(artifacts_dir / "embeddings.npy")
+    embeddings = np.load(artifacts_dir / "embeddings.npy", mmap_mode="r")
     review_ids = np.load(artifacts_dir / "review_ids.npy")
     with open(artifacts_dir / "topic_assignments.json") as f:
         topic_assignments = json.load(f)
@@ -226,7 +226,34 @@ def run_vibe_score(db_path: str, artifacts_dir: Path, force: bool = False) -> di
         )
         neighbourhood_scores[nid] = scores
 
-    # 7. Save artifact
+    # 7. Two-pass normalization:
+    #    Pass A — cross-neighbourhood z-score per archetype: makes the map
+    #             show which neighbourhoods are most distinctive for each vibe
+    #             relative to the city as a whole (removes global foodie bias).
+    #    Pass B — per-neighbourhood clip to [0, inf): suppresses archetypes
+    #             that are below this neighbourhood's own average.
+    archetype_names = list(archetypes.keys())
+    all_nids = list(neighbourhood_scores.keys())
+
+    # Pass A: for each archetype, z-score across all neighbourhoods
+    for arch in archetype_names:
+        vals = np.array([neighbourhood_scores[nid][arch] for nid in all_nids], dtype=float)
+        mean, std = vals.mean(), vals.std()
+        if std > 0:
+            normed = (vals - mean) / std
+        else:
+            normed = vals - mean
+        for nid, v in zip(all_nids, normed):
+            neighbourhood_scores[nid][arch] = float(v)
+
+    # Pass B: clip negatives within each neighbourhood
+    for nid in all_nids:
+        scores = neighbourhood_scores[nid]
+        neighbourhood_scores[nid] = {
+            a: max(0.0, scores[a]) for a in archetype_names
+        }
+
+    # 8. Save artifact
     with open(output_path, "w") as f:
         json.dump(neighbourhood_scores, f, indent=2)
 
