@@ -3,7 +3,7 @@ import { AnimatePresence } from 'framer-motion';
 import Map, { Source, Layer, useMap } from 'react-map-gl/maplibre';
 import type { MapLayerMouseEvent } from 'react-map-gl/maplibre';
 import type { FillLayerSpecification, LineLayerSpecification } from 'maplibre-gl';
-import { VIBE_MATCH_EXPR, getInterpolatedColor } from '../lib/colors';
+import { VIBE_MATCH_EXPR, getInterpolatedColor, getDominantVibe } from '../lib/colors';
 import { BASEMAP_STYLE, INITIAL_VIEW } from '../lib/constants';
 import { useMapStore } from '../store/mapStore';
 import { useNeighbourhoods } from '../hooks/useNeighbourhoods';
@@ -125,17 +125,21 @@ export default function VibeMap() {
 
     return {
       ...geojson,
-      features: geojson.features.map((f) => ({
-        ...f,
-        properties: {
-          ...f.properties,
-          _fillColor: getInterpolatedColor(
-            temporalData,
-            f.properties?.NEIGHBORHOOD_NUMBER ?? '',
-            currentYear,
-          ),
-        },
-      })),
+      features: geojson.features.map((f) => {
+        const nid = f.properties?.NEIGHBORHOOD_NUMBER ?? '';
+        const yearKey = String(Math.round(currentYear));
+        const yearScores = temporalData[nid]?.[yearKey];
+        return {
+          ...f,
+          properties: {
+            ...f.properties,
+            _fillColor: getInterpolatedColor(temporalData, nid, currentYear),
+            _dominantVibe: yearScores
+              ? (getDominantVibe(yearScores) ?? f.properties?.dominant_vibe)
+              : f.properties?.dominant_vibe,
+          },
+        };
+      }),
     };
   }, [geojson, temporalData, currentYear]);
 
@@ -161,7 +165,7 @@ export default function VibeMap() {
           y: event.point.y,
           flipX: event.point.x > containerWidth - 220,
           name: feature.properties?.NEIGHBORHOOD_NAME,
-          vibe: feature.properties?.dominant_vibe,
+          vibe: feature.properties?._dominantVibe ?? feature.properties?.dominant_vibe,
         });
         setHovered(feature.properties?.NEIGHBORHOOD_NUMBER);
       } else {

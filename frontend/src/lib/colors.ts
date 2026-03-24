@@ -23,7 +23,7 @@ export const VIBE_MATCH_EXPR = [
 
 const FALLBACK_COLOR = '#888888';
 
-export function getDominantColor(scores: Record<string, number>): string {
+export function getDominantVibe(scores: Record<string, number>): string | null {
   let maxKey: string | null = null;
   let maxVal = 0;
   for (const key of ARCHETYPE_ORDER) {
@@ -33,8 +33,12 @@ export function getDominantColor(scores: Record<string, number>): string {
       maxKey = key;
     }
   }
-  if (!maxKey || maxVal <= 0) return FALLBACK_COLOR;
-  return VIBE_COLORS[maxKey as VibeArchetype] ?? FALLBACK_COLOR;
+  return maxKey && maxVal > 0 ? maxKey : null;
+}
+
+export function getDominantColor(scores: Record<string, number>): string {
+  const vibe = getDominantVibe(scores);
+  return vibe ? (VIBE_COLORS[vibe as VibeArchetype] ?? FALLBACK_COLOR) : FALLBACK_COLOR;
 }
 
 export function getInterpolatedColor(

@@ -5,7 +5,7 @@ import VibeBars from './VibeBars';
 import TopicList from './TopicList';
 import SentimentPills from './SentimentPills';
 import QuoteCarousel from './QuoteCarousel';
-import { VIBE_COLORS } from '../lib/colors';
+import { VIBE_COLORS, getDominantVibe } from '../lib/colors';
 import type { VibeArchetype } from '../lib/types';
 
 const containerVariants = {
@@ -60,6 +60,8 @@ export default function DetailPanel() {
   const detail = useMapStore((s) => s.detail);
   const detailError = useMapStore((s) => s.detailError);
   const retryDetailFetch = useMapStore((s) => s.retryDetailFetch);
+  const temporalData = useMapStore((s) => s.temporalData);
+  const currentYear = useMapStore((s) => Math.round(s.currentYear));
   const [retryHovered, setRetryHovered] = useState(false);
 
   const reviewCountMv = useMotionValue(0);
@@ -146,8 +148,17 @@ export default function DetailPanel() {
     return null;
   }
 
+  // When time slider is active, use year-specific scores so panel matches map color
+  const yearScores = temporalData && currentYear > 0
+    ? temporalData[detail.neighbourhood_id]?.[String(currentYear)]
+    : null;
+  const effectiveVibeScores = yearScores ?? detail.vibe_scores;
+  const effectiveDominantVibe = yearScores
+    ? (getDominantVibe(yearScores) ?? detail.dominant_vibe)
+    : detail.dominant_vibe;
+
   const accentColor =
-    VIBE_COLORS[detail.dominant_vibe as VibeArchetype] ?? '#888888';
+    VIBE_COLORS[effectiveDominantVibe as VibeArchetype] ?? '#888888';
 
   return (
     <motion.div
@@ -177,8 +188,8 @@ export default function DetailPanel() {
         </h2>
         {/* Top 3 vibes as colored dots + labels */}
         <SentimentPills
-          vibeScores={detail.vibe_scores}
-          dominantVibe={detail.dominant_vibe}
+          vibeScores={effectiveVibeScores}
+          dominantVibe={effectiveDominantVibe}
         />
       </motion.div>
 
@@ -195,7 +206,7 @@ export default function DetailPanel() {
       {/* Vibe breakdown */}
       <motion.div variants={itemVariants}>
         <SectionLabel>Vibe Breakdown</SectionLabel>
-        <VibeBars vibeScores={detail.vibe_scores} />
+        <VibeBars vibeScores={effectiveVibeScores} />
       </motion.div>
 
       <Divider />
@@ -213,7 +224,7 @@ export default function DetailPanel() {
         <SectionLabel>Locals Say</SectionLabel>
         <QuoteCarousel
           quotes={detail.quotes}
-          dominantVibe={detail.dominant_vibe}
+          dominantVibe={effectiveDominantVibe}
         />
       </motion.div>
 
