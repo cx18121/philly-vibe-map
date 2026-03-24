@@ -6,10 +6,14 @@ interface MapStore {
   hoveredId: string | null;
   isLoading: boolean;
   detail: NeighbourhoodDetail | null;
+  detailError: boolean;
+  detailFetchKey: number;
   setSelected: (id: string | null) => void;
   setHovered: (id: string | null) => void;
   setDetail: (detail: NeighbourhoodDetail | null) => void;
   setLoading: (loading: boolean) => void;
+  setDetailError: (err: boolean) => void;
+  retryDetailFetch: () => void;
   clearSelection: () => void;
 
   // Temporal state
@@ -27,11 +31,15 @@ export const useMapStore = create<MapStore>((set) => ({
   hoveredId: null,
   isLoading: false,
   detail: null,
+  detailError: false,
+  detailFetchKey: 0,
   setSelected: (id) => set({ selectedId: id }),
   setHovered: (id) => set({ hoveredId: id }),
   setDetail: (detail) => set({ detail, isLoading: false }),
   setLoading: (loading) => set({ isLoading: loading }),
-  clearSelection: () => set({ selectedId: null, detail: null }),
+  setDetailError: (err) => set({ detailError: err, isLoading: false }),
+  retryDetailFetch: () => set((s) => ({ detailFetchKey: s.detailFetchKey + 1, detailError: false })),
+  clearSelection: () => set({ selectedId: null, detail: null, detailError: false }),
 
   // Temporal state
   currentYear: 0,

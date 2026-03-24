@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import Map, { Source, Layer, useMap } from 'react-map-gl/maplibre';
 import type { MapLayerMouseEvent } from 'react-map-gl/maplibre';
 import type { FillLayerSpecification, LineLayerSpecification } from 'maplibre-gl';
@@ -56,11 +57,13 @@ const highlightLineLayer: Omit<LineLayerSpecification, 'source'> = {
 };
 
 export default function VibeMap() {
-  const { geojson, loading } = useNeighbourhoods();
+  const { geojson, loading, error } = useNeighbourhoods();
   useNeighbourhoodDetail();
 
   const temporalData = useTemporal();
-  const currentYear = useMapStore((s) => s.currentYear);
+  // Snap to integer years — color only changes at year boundaries, so recomputing
+  // 60 times per year at fractional values burns CPU and triggers MapLibre GPU re-uploads.
+  const currentYear = useMapStore((s) => Math.round(s.currentYear));
   const hoveredId = useMapStore((s) => s.hoveredId);
   const setSelected = useMapStore((s) => s.setSelected);
   const setHovered = useMapStore((s) => s.setHovered);
@@ -99,6 +102,7 @@ export default function VibeMap() {
   const [tooltipInfo, setTooltipInfo] = useState<{
     x: number;
     y: number;
+    flipX: boolean;
     name: string;
     vibe: string;
   } | null>(null);
@@ -143,7 +147,7 @@ export default function VibeMap() {
       'fill-color': temporalData
         ? (['get', '_fillColor'] as unknown as string)
         : (VIBE_MATCH_EXPR as unknown as string),
-      'fill-opacity': 0.6,
+      'fill-opacity': 0.72,
     },
   }), [temporalData]);
 
@@ -151,9 +155,11 @@ export default function VibeMap() {
     (event: MapLayerMouseEvent) => {
       const feature = event.features?.[0];
       if (feature) {
+        const containerWidth = mapRef.current?.clientWidth ?? window.innerWidth;
         setTooltipInfo({
           x: event.point.x,
           y: event.point.y,
+          flipX: event.point.x > containerWidth - 220,
           name: feature.properties?.NEIGHBORHOOD_NAME,
           vibe: feature.properties?.dominant_vibe,
         });
@@ -208,6 +214,45 @@ export default function VibeMap() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [focusIndex, neighbourhoodIds, clearSelection, setHovered, setSelected]);
 
+  if (error && !loading) {
+    return (
+      <div
+        style={{
+          width: '100%',
+          height: '100vh',
+          background: '#0f0f1a',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 16,
+        }}
+      >
+        <p
+          style={{
+            fontFamily: "'Fraunces', serif",
+            fontSize: '1.2rem',
+            fontWeight: 700,
+            color: 'rgba(240,240,240,0.6)',
+            letterSpacing: '-0.02em',
+          }}
+        >
+          Couldn't load the map
+        </p>
+        <p
+          style={{
+            fontFamily: "'Outfit', sans-serif",
+            fontSize: '0.75rem',
+            color: 'rgba(240,240,240,0.28)',
+            letterSpacing: '0.04em',
+          }}
+        >
+          Check your connection and refresh the page.
+        </p>
+      </div>
+    );
+  }
+
   if (loading || !computedGeojson) {
     return <MapSkeleton />;
   }
@@ -239,7 +284,9 @@ export default function VibeMap() {
           <Layer {...outlineLayer} />
         </Source>
       </Map>
-      {tooltipInfo && <Tooltip {...tooltipInfo} />}
+      <AnimatePresence>
+        {tooltipInfo && <Tooltip key="tooltip" {...tooltipInfo} />}
+      </AnimatePresence>
     </div>
   );
 }

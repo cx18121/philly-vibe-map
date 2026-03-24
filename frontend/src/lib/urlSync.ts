@@ -6,11 +6,20 @@ import { useMapStore } from '../store/mapStore';
  * Returns an unsubscribe function for cleanup (useful in tests).
  */
 export function initUrlSync(): () => void {
-  return useMapStore.subscribe((state, prev) => {
-    if (state.selectedId === prev.selectedId && state.currentYear === prev.currentYear) return;
+  // Track last-written values to avoid calling replaceState on every animation frame.
+  // currentYear updates at 60fps during playback — only sync when the rounded year changes.
+  let lastSelected: string | null = null;
+  let lastYear = -1;
+
+  return useMapStore.subscribe((state) => {
+    const year = Math.round(state.currentYear);
+    if (state.selectedId === lastSelected && year === lastYear) return;
+    lastSelected = state.selectedId;
+    lastYear = year;
+
     const params = new URLSearchParams();
     if (state.selectedId) params.set('nid', state.selectedId);
-    if (state.currentYear) params.set('year', String(state.currentYear));
+    if (year) params.set('year', String(year));
     const qs = params.toString();
     window.history.replaceState(null, '', qs ? `?${qs}` : window.location.pathname);
   });
