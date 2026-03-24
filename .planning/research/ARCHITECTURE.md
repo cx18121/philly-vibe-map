@@ -74,7 +74,7 @@ OFFLINE (local GPU, run once)                    ONLINE (deployed, serves users)
 ## Recommended Project Structure
 
 ```
-neighborhood-vibe-mapper/
+philly-vibe-map/
 ├── pipeline/                    # Offline data + NLP pipeline (Python)
 │   ├── collect/                 # Data collection scripts
 │   │   ├── google_places.py     # Google Places API fetcher

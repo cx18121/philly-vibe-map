@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 06-01-PLAN.md
-last_updated: "2026-03-21T20:57:22.518Z"
+stopped_at: "Checkpoint at 06-02 Task 2: awaiting human deploy"
+last_updated: "2026-03-21T20:59:07.983Z"
 progress:
   total_phases: 6
   completed_phases: 5
@@ -114,6 +114,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-21T20:57:22.334Z
-Stopped at: Completed 06-01-PLAN.md
+Last session: 2026-03-22
+Stopped at: Resumed — waiting on user to complete Render + Vercel deploy (06-02 Task 2 checkpoint)
 Resume file: None
