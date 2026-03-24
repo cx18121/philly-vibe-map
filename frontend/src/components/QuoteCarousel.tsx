@@ -38,9 +38,14 @@ export default function QuoteCarousel({ quotes, dominantVibe }: Props) {
         <motion.div
           key={page}
           custom={direction}
-          initial={(dir: number) => ({ opacity: 0, x: dir * 18 })}
-          animate={{ opacity: 1, x: 0 }}
-          exit={(dir: number) => ({ opacity: 0, x: dir * -12 })}
+          variants={{
+            initial: (dir: number) => ({ opacity: 0, x: dir * 18 }),
+            animate: { opacity: 1, x: 0 },
+            exit: (dir: number) => ({ opacity: 0, x: dir * -12 }),
+          }}
+          initial="initial"
+          animate="animate"
+          exit="exit"
           transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
           style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
         >

@@ -3,6 +3,7 @@ import { useMapStore } from '../store/mapStore';
 import { initUrlSync, hydrateFromUrl } from '../lib/urlSync';
 
 describe('urlSync', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let replaceStateSpy: ReturnType<typeof vi.fn>;
   let unsubscribe: (() => void) | undefined;
 
@@ -16,7 +17,8 @@ describe('urlSync', () => {
 
     // Mock history.replaceState
     replaceStateSpy = vi.fn();
-    vi.spyOn(window.history, 'replaceState').mockImplementation(replaceStateSpy);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.spyOn(window.history as any, 'replaceState').mockImplementation(replaceStateSpy);
 
     // Navigate to clean URL (jsdom supports this)
     window.history.pushState = vi.fn();
@@ -70,7 +72,7 @@ describe('urlSync', () => {
   describe('hydrateFromUrl', () => {
     it('reads nid and year from URL and sets store', () => {
       // Use jsdom's native navigation to set search params
-      window.history.replaceState.mockRestore?.();
+      vi.restoreAllMocks();
       window.history.replaceState({}, '', '?nid=042&year=2022');
       hydrateFromUrl();
       const state = useMapStore.getState();
@@ -79,7 +81,7 @@ describe('urlSync', () => {
     });
 
     it('does nothing when URL has no params', () => {
-      window.history.replaceState.mockRestore?.();
+      vi.restoreAllMocks();
       window.history.replaceState({}, '', '/');
       hydrateFromUrl();
       const state = useMapStore.getState();
@@ -88,7 +90,7 @@ describe('urlSync', () => {
     });
 
     it('handles partial params - only nid', () => {
-      window.history.replaceState.mockRestore?.();
+      vi.restoreAllMocks();
       window.history.replaceState({}, '', '?nid=042');
       hydrateFromUrl();
       const state = useMapStore.getState();
@@ -97,7 +99,7 @@ describe('urlSync', () => {
     });
 
     it('handles partial params - only year', () => {
-      window.history.replaceState.mockRestore?.();
+      vi.restoreAllMocks();
       window.history.replaceState({}, '', '?year=2020');
       hydrateFromUrl();
       const state = useMapStore.getState();
