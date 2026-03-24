@@ -29,15 +29,15 @@ export default function App() {
     <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
       <VibeMap />
 
-      {/* Editorial title — top left, non-interactive */}
+      {/* Editorial masthead — top left, non-interactive */}
       <motion.div
-        initial={{ opacity: 0, y: -10 }}
+        initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.35 }}
         style={{
           position: 'absolute',
-          top: 16,
-          left: 16,
+          top: 18,
+          left: 18,
           zIndex: 10,
           pointerEvents: 'none',
           userSelect: 'none',
@@ -45,36 +45,28 @@ export default function App() {
       >
         <div
           style={{
-            fontFamily: "'Fraunces', serif",
-            fontSize: '1.2rem',
-            fontWeight: 700,
-            color: 'rgba(240,240,240,0.92)',
-            letterSpacing: '-0.025em',
-            lineHeight: 1.2,
-          }}
-        >
-          Vibe Mapper
-        </div>
-        {/* Editorial accent line — warm gold, always visible */}
-        <div
-          style={{
-            height: 1,
-            width: 52,
-            background: 'linear-gradient(to right, #DDCC77, transparent)',
-            marginTop: 6,
-            marginBottom: 3,
-          }}
-        />
-        <div
-          style={{
-            fontSize: '0.6rem',
-            color: 'rgba(240,240,240,0.32)',
-            letterSpacing: '0.14em',
-            textTransform: 'uppercase',
             fontFamily: "'Outfit', sans-serif",
+            fontSize: '0.6rem',
+            fontWeight: 500,
+            color: 'rgba(240,240,240,0.38)',
+            letterSpacing: '0.22em',
+            textTransform: 'uppercase',
+            marginBottom: 4,
           }}
         >
           Philadelphia
+        </div>
+        <div
+          style={{
+            fontFamily: "'Fraunces', serif",
+            fontSize: '1.05rem',
+            fontWeight: 400,
+            color: 'rgba(240,240,240,0.72)',
+            letterSpacing: '-0.02em',
+            lineHeight: 1,
+          }}
+        >
+          Vibe Map
         </div>
       </motion.div>
 
