@@ -1,6 +1,5 @@
-# Philly Vibe Map
-
-An interactive map of Philadelphia neighbourhoods, where each colour represents a "vibe" derived from ~1.1 million Yelp reviews. The map lets you scrub through time to watch neighbourhoods change character — Fishtown going from quiet to electric, South Philly holding steady, new spots emerging in Point Breeze.
+# philly vibe map
+An interactive map of Philadelphia neighbourhoods, where each colour represents a "vibe" derived from ~1.1 million Yelp reviews. The map lets you go through time to watch neighbourhoods change character.
 
 **Live:** [philly-vibe-map.vercel.app](https://philly-vibe-map.vercel.app)
 
@@ -14,8 +13,6 @@ Pick a neighbourhood on the map. You get:
 - A sentiment breakdown and representative quotes pulled straight from Yelp reviews
 - A time slider — drag it and watch the colours shift as the neighbourhood changes year over year
 - A "similar neighbourhoods" list powered by cosine similarity over vibe vectors
-
-The aesthetic is dark and editorial. The data is the hero.
 
 ---
 
@@ -39,13 +36,13 @@ FastAPI + SQLite. Serves pre-computed artifacts — no ML models loaded at runti
 
 ### 3. Frontend (`/frontend`)
 
-React 19 + MapLibre GL JS + Framer Motion + Zustand. Six Wong-adapted vibe colours are the visual centrepiece; UI chrome is deliberately minimal and dark.
+React 19 + MapLibre GL JS + Framer Motion + Zustand.
 
 ---
 
 ## Data
 
-Yelp Open Dataset (Philadelphia). ~14,568 businesses, ~1.1M reviews. The dataset has real coverage from 2015–2021; 2022 is a truncated January release and is excluded. The original plan targeted NYC, but Yelp's NYC coverage was under 500 businesses — Philly is a first-class city in the dataset.
+Yelp Open Dataset (Philadelphia). ~14,568 businesses, ~1.1M reviews. The dataset has real coverage from 2015–2021; 
 
 Neighbourhood boundaries from OpenDataPhilly (157 neighbourhoods).
 
@@ -59,10 +56,6 @@ Neighbourhood boundaries from OpenDataPhilly (157 neighbourhoods).
 | sentence-transformers over word2vec | Context-aware, no "bank" ambiguity problem |
 | LoRA fine-tuning over VADER | Domain adaptation with ~0.5% of base model parameters |
 | FAISS over numpy | Industry-standard similarity search; trivial to scale |
-| SQLite over Postgres | Read-only pre-computed data; no reason for the overhead |
-| Vite + Vercel | Fast cold starts matter for a portfolio piece |
-
-Full rationale in [`pipeline/PIPELINE_DECISIONS.md`](pipeline/PIPELINE_DECISIONS.md).
 
 ---
 
