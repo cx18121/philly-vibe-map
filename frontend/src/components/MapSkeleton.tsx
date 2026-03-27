@@ -6,7 +6,7 @@ import { ARCHETYPE_ORDER } from '../lib/constants';
 const LOADING_MESSAGES = [
   'Reading the city\u2019s neighbourhoods\u2026',
   'Mapping vibe signals across Philly\u2026',
-  'Weighing six years of local reviews\u2026',
+  'Weighing fifteen years of local reviews\u2026',
   'Surfacing what makes each block feel alive\u2026',
 ];
 
