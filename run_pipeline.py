@@ -1,13 +1,12 @@
 """Run the full NLP pipeline end-to-end.
 
 Stages (in order):
-  1. embed          — sentence-transformer embeddings (all-MiniLM-L6-v2)
-  2. topic_model    — BERTopic topic discovery
-  3. sentiment      — domain-adapted sentiment classifier (DistilBERT + LoRA)
-  3b. sentiment_agg — per-neighbourhood sentiment aggregation
-  4. vibe_score     — 6-archetype vibe scoring + recency weighting
-  5. temporal       — year-bucketed temporal drift
-  6. export         — FAISS index, representative quotes, enriched GeoJSON
+  1. embed        — sentence-transformer embeddings (all-MiniLM-L6-v2)
+  2. topic_model  — BERTopic topic discovery
+  3. sentiment    — domain-adapted sentiment classifier
+  4. vibe_score   — 6-archetype vibe scoring + recency weighting
+  5. temporal     — year-bucketed temporal drift
+  6. export       — FAISS index, representative quotes, enriched GeoJSON
 
 Usage:
   python run_pipeline.py                  # run all stages, skip if artifacts exist
@@ -26,13 +25,12 @@ DB_PATH = "data/output/reviews.db"
 ARTIFACTS_DIR = Path("data/output/artifacts")
 
 STAGES = [
-    ("embed",          "pipeline.stages.embed",          "run_embed"),
-    ("topic_model",    "pipeline.stages.topic_model",    "run_topic_model"),
-    ("sentiment",      "pipeline.stages.sentiment",      "run_sentiment"),
-    ("sentiment_agg",  "pipeline.stages.sentiment_agg",  "run_sentiment_agg"),
-    ("vibe_score",     "pipeline.stages.vibe_score",     "run_vibe_score"),
-    ("temporal",       "pipeline.stages.temporal",       "run_temporal"),
-    ("export",         "pipeline.stages.export",         "run_export"),
+    ("embed",       "pipeline.stages.embed",       "run_embed"),
+    ("topic_model", "pipeline.stages.topic_model", "run_topic_model"),
+    ("sentiment",   "pipeline.stages.sentiment",   "run_sentiment"),
+    ("vibe_score",  "pipeline.stages.vibe_score",  "run_vibe_score"),
+    ("temporal",    "pipeline.stages.temporal",    "run_temporal"),
+    ("export",      "pipeline.stages.export",      "run_export"),
 ]
 
 

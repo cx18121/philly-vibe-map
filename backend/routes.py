@@ -6,7 +6,7 @@ import faiss
 from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import Response
 
-from backend.schemas import NeighbourhoodDetail, SentimentSummary, SimilarNeighbourhood, TopicEntry
+from backend.schemas import NeighbourhoodDetail, SimilarNeighbourhood, TopicEntry
 
 router = APIRouter()
 
@@ -35,9 +35,6 @@ def get_neighbourhood_detail(nid: str, request: Request) -> NeighbourhoodDetail:
     raw_topics = request.app.state.topics.get(nid, [])
     topics = [TopicEntry(**t) for t in raw_topics]
 
-    raw_sentiment = request.app.state.neighbourhood_sentiment.get(nid)
-    sentiment = SentimentSummary(**raw_sentiment) if raw_sentiment else None
-
     return NeighbourhoodDetail(
         neighbourhood_id=nid,
         neighbourhood_name=request.app.state.nid_to_name.get(nid),
@@ -47,7 +44,6 @@ def get_neighbourhood_detail(nid: str, request: Request) -> NeighbourhoodDetail:
         topics=topics,
         quotes=request.app.state.quotes.get(nid, {}),
         review_count=request.app.state.review_counts.get(nid, 0),
-        sentiment=sentiment,
     )
 
 

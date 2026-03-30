@@ -39,7 +39,6 @@ EXPECTED_ARTIFACTS = [
     "faiss_id_map.json",
     "representative_quotes.json",
     "sentiment_model",
-    "neighbourhood_sentiment.json",
     "enriched_geojson.geojson",
     "neighbourhood_topics.json",
     "review_counts.json",
@@ -219,14 +218,6 @@ def _build_enriched_geojson(
     with open(geojson_path) as f:
         geojson = json.load(f)
 
-    # Load neighbourhood sentiment if available
-    sentiment_path = artifacts_dir / "neighbourhood_sentiment.json"
-    neighbourhood_sentiment: dict = {}
-    if sentiment_path.exists():
-        with open(sentiment_path) as f:
-            neighbourhood_sentiment = json.load(f)
-        _log("INFO", f"Loaded sentiment for {len(neighbourhood_sentiment)} neighbourhoods")
-
     enriched_count = 0
     for feature in geojson["features"]:
         nid = feature["properties"].get("NEIGHBORHOOD_NUMBER")
@@ -236,8 +227,6 @@ def _build_enriched_geojson(
             dominant = max(scores, key=scores.get)
             feature["properties"]["dominant_vibe"] = dominant
             feature["properties"]["dominant_vibe_score"] = scores[dominant]
-            if nid in neighbourhood_sentiment:
-                feature["properties"]["sentiment"] = neighbourhood_sentiment[nid]
             enriched_count += 1
 
     with open(artifacts_dir / "enriched_geojson.geojson", "w") as f:
