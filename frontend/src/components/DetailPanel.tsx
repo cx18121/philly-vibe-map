@@ -4,6 +4,7 @@ import { useMapStore } from '../store/mapStore';
 import VibeBars from './VibeBars';
 import TopicList from './TopicList';
 import SentimentPills from './SentimentPills';
+import SentimentGauge from './SentimentGauge';
 import QuoteCarousel from './QuoteCarousel';
 import { VIBE_COLORS, getDominantVibe } from '../lib/colors';
 import type { VibeArchetype } from '../lib/types';
@@ -216,6 +217,17 @@ export default function DetailPanel() {
         <SectionLabel>Conversation Topics</SectionLabel>
         <TopicList topics={detail.topics} accentColor={accentColor} />
       </motion.div>
+
+      {/* Sentiment */}
+      {detail.sentiment && (
+        <>
+          <Divider />
+          <motion.div variants={itemVariants}>
+            <SectionLabel>Review Sentiment</SectionLabel>
+            <SentimentGauge sentiment={detail.sentiment} />
+          </motion.div>
+        </>
+      )}
 
       <Divider loose />
 

@@ -17,6 +17,16 @@ class TopicEntry(BaseModel):
     review_share: float
 
 
+class SentimentSummary(BaseModel):
+    """Aggregated sentiment distribution for a neighbourhood."""
+
+    positive: float
+    neutral: float
+    negative: float
+    mean_score: float
+    review_count: int
+
+
 class NeighbourhoodDetail(BaseModel):
     """Full detail for a single neighbourhood."""
 
@@ -28,6 +38,7 @@ class NeighbourhoodDetail(BaseModel):
     topics: list[TopicEntry]
     quotes: dict[str, list[str]]
     review_count: int
+    sentiment: SentimentSummary | None = None
 
 
 class SimilarNeighbourhood(BaseModel):

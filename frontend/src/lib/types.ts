@@ -4,6 +4,14 @@ export interface TopicEntry {
   review_share: number;
 }
 
+export interface SentimentSummary {
+  positive: number;
+  neutral: number;
+  negative: number;
+  mean_score: number;
+  review_count: number;
+}
+
 export interface NeighbourhoodDetail {
   neighbourhood_id: string;
   neighbourhood_name: string | null;
@@ -13,6 +21,7 @@ export interface NeighbourhoodDetail {
   topics: TopicEntry[];
   quotes: Record<string, string[]>;
   review_count: number;
+  sentiment: SentimentSummary | null;
 }
 
 export interface SimilarNeighbourhood {

@@ -95,6 +95,16 @@ def load_artifacts(artifacts_dir: Path) -> dict:
         review_counts = json.load(f)
     _log("INFO", f"Review counts loaded: {len(review_counts)} neighbourhoods")
 
+    # Neighbourhood sentiment (optional — missing artifact is non-fatal)
+    sentiment_path = artifacts_dir / "neighbourhood_sentiment.json"
+    neighbourhood_sentiment: dict = {}
+    if sentiment_path.exists():
+        with open(sentiment_path) as f:
+            neighbourhood_sentiment = json.load(f)
+        _log("INFO", f"Neighbourhood sentiment loaded: {len(neighbourhood_sentiment)} neighbourhoods")
+    else:
+        _log("WARN", "neighbourhood_sentiment.json not found -- sentiment layer unavailable")
+
     # FAISS index
     faiss_index = faiss.read_index(str(artifacts_dir / "faiss_index.bin"))
     _log("INFO", f"FAISS index loaded: {faiss_index.ntotal} vectors, dim={faiss_index.d}")
@@ -129,6 +139,7 @@ def load_artifacts(artifacts_dir: Path) -> dict:
         "quotes": quotes,
         "topics": topics,
         "review_counts": review_counts,
+        "neighbourhood_sentiment": neighbourhood_sentiment,
         "faiss_index": faiss_index,
         "faiss_id_map": faiss_id_map,
         "faiss_reverse": faiss_reverse,
