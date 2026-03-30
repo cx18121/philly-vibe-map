@@ -91,6 +91,53 @@ def _build_faiss_index(
 # Sub-stage B: Representative Quotes (NLP-08)
 # ---------------------------------------------------------------------------
 
+def _load_sentiment_model(artifacts_dir: Path):
+    """Load the fine-tuned sentiment model if available.
+
+    Returns (model, tokenizer, device) or (None, None, None) if unavailable.
+    """
+    model_dir = artifacts_dir / "sentiment_model"
+    if not model_dir.exists():
+        return None, None, None
+
+    try:
+        import torch
+        from transformers import AutoModelForSequenceClassification, AutoTokenizer
+
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        tokenizer = AutoTokenizer.from_pretrained(str(model_dir))
+        model = AutoModelForSequenceClassification.from_pretrained(str(model_dir))
+        model.to(device)
+        model.eval()
+        return model, tokenizer, device
+    except Exception as e:
+        _log("WARN", f"Could not load sentiment model: {e}")
+        return None, None, None
+
+
+def _score_sentiment(texts: list[str], model, tokenizer, device) -> list[float]:
+    """Return positive-class probability for each text.
+
+    Uses the fine-tuned 3-class DistilBERT model. Output label order
+    is [negative, neutral, positive], so index 2 is the positive score.
+    """
+    import torch
+
+    encodings = tokenizer(
+        texts,
+        truncation=True,
+        max_length=256,
+        padding=True,
+        return_tensors="pt",
+    ).to(device)
+
+    with torch.no_grad():
+        logits = model(**encodings).logits
+        probs = torch.softmax(logits, dim=-1).cpu().numpy()
+
+    return [float(p[2]) for p in probs]  # positive class probability
+
+
 def _select_representative_quotes(
     db_path: str,
     artifacts_dir: Path,
@@ -98,8 +145,10 @@ def _select_representative_quotes(
 ) -> dict:
     """Select 3-5 representative quotes per neighbourhood per archetype.
 
-    Quotes are ranked by cosine similarity of the review embedding
-    to the archetype centroid embedding. Truncated to 300 chars max.
+    Quotes are ranked by cosine similarity to archetype centroids, then
+    filtered by sentiment (positive reviews only) using the fine-tuned
+    DistilBERT model if available. Falls back to similarity-only ranking
+    if the sentiment model is not present.
 
     Returns:
         {neighbourhood_id: {archetype: [quote_text, ...]}}
@@ -123,6 +172,21 @@ def _select_representative_quotes(
 
     _log("INFO", f"Computed {len(archetype_centroids)} archetype centroids for quote selection")
 
+    # Load sentiment model for quote filtering
+    sent_model, sent_tokenizer, sent_device = _load_sentiment_model(artifacts_dir)
+    use_sentiment = sent_model is not None
+    if use_sentiment:
+        _log("INFO", "Sentiment model loaded -- filtering quotes by positive sentiment")
+    else:
+        _log("INFO", "No sentiment model -- using similarity-only quote ranking")
+
+    # How many candidates to fetch per archetype per neighbourhood.
+    # With sentiment filtering we over-fetch, then keep the top 5 positive ones.
+    CANDIDATES = 15 if use_sentiment else 5
+    FINAL_K = 5
+    # Minimum positive probability to keep a quote
+    POSITIVE_THRESHOLD = 0.5
+
     # Load review texts and neighbourhood mappings from DB
     conn = sqlite3.connect(db_path)
     review_data: dict[int, tuple[str, str]] = {}  # {rowid: (text, neighbourhood_id)}
@@ -144,6 +208,8 @@ def _select_representative_quotes(
 
     sorted_nids = sorted(vibe_scores.keys())
     quotes: dict[str, dict[str, list[str]]] = {}
+    total_filtered = 0
+    total_candidates = 0
 
     for nid in sorted_nids:
         quotes[nid] = {}
@@ -167,14 +233,35 @@ def _select_representative_quotes(
             sims = cosine_similarity(
                 nid_embeddings, arch_centroid.reshape(1, -1)
             ).flatten()
-            top_k = min(5, len(sims))
-            top_indices = np.argsort(sims)[-top_k:][::-1]  # descending similarity
+            top_k = min(CANDIDATES, len(sims))
+            top_indices = np.argsort(sims)[-top_k:][::-1]
 
+            # Gather candidate texts
+            candidate_rids = [nid_rids[ti] for ti in top_indices]
+            candidate_texts = [review_data[rid][0] for rid in candidate_rids]
+            total_candidates += len(candidate_texts)
+
+            if use_sentiment and candidate_texts:
+                # Score sentiment and filter to positive reviews
+                pos_scores = _score_sentiment(
+                    candidate_texts, sent_model, sent_tokenizer, sent_device
+                )
+                scored = list(zip(candidate_texts, pos_scores))
+                # Keep only positive, sort by sentiment score descending
+                positive = [(t, s) for t, s in scored if s >= POSITIVE_THRESHOLD]
+                if positive:
+                    positive.sort(key=lambda x: x[1], reverse=True)
+                    candidate_texts = [t for t, _ in positive[:FINAL_K]]
+                    total_filtered += len(scored) - len(positive)
+                else:
+                    # All candidates were negative — fall back to top by similarity
+                    candidate_texts = candidate_texts[:FINAL_K]
+            else:
+                candidate_texts = candidate_texts[:FINAL_K]
+
+            # Truncate texts
             arch_quotes = []
-            for ti in top_indices:
-                rid = nid_rids[ti]
-                text = review_data[rid][0]
-                # Truncate to 300 chars
+            for text in candidate_texts:
                 if len(text) > 300:
                     text = text[:297] + "..."
                 arch_quotes.append(text)
@@ -185,6 +272,8 @@ def _select_representative_quotes(
     with open(artifacts_dir / "representative_quotes.json", "w") as f:
         json.dump(quotes, f, indent=2)
 
+    if use_sentiment:
+        _log("INFO", f"Sentiment filtering: {total_filtered}/{total_candidates} negative candidates removed")
     _log("INFO", f"Representative quotes saved: {len(quotes)} neighbourhoods")
     return quotes
 
