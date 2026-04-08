@@ -56,7 +56,7 @@ export const useMapStore = create<MapStore>((set) => ({
     set({
       temporalData: data,
       availableYears: years,
-      currentYear: years.length > 0 ? years[years.length - 1] : 0,
+      currentYear: years.length > 0 ? years[0] : 0,
     });
   },
 }));
